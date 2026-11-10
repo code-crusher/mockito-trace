@@ -67,6 +67,14 @@ public class ReturnsArgumentAt implements Answer<Object>, ValidableAnswer, Seria
     @Override
     public void validateFor(InvocationOnMock invocationOnMock) {
         Invocation invocation = (Invocation) invocationOnMock;
+        if (wantedArgIndexIsVarargAndSameTypeAsReturnType(invocation)) {
+            // answer raw vararg array argument
+            int rawArgumentPosition = inferWantedRawArgumentPosition(invocation);
+            validateIndexWithinTheoreticalInvocationRange(invocation, rawArgumentPosition);
+            validateArgumentTypeCompatibility(invocation, rawArgumentPosition);
+            return;
+        }
+
         int argumentPosition = inferWantedArgumentPosition(invocation);
         validateIndexWithinTheoreticalInvocationRange(invocation, argumentPosition);
         validateArgumentTypeCompatibility(invocation, argumentPosition);

@@ -112,6 +112,61 @@ public class ReturnsArgumentAtTest {
     }
 
     @Test
+    public void should_handle_returning_vararg_as_array_when_stubbed_with_concrete_array()
+            throws Throwable {
+        // regression test for #3893: stubbing with a concrete (empty, null or multi-element)
+        // vararg array must validate against the raw array argument, not the expanded
+        // vararg elements
+        for (ReturnsArgumentAt answer :
+                new ReturnsArgumentAt[] {
+                    new ReturnsArgumentAt(1), new ReturnsArgumentAt(-1)
+                }) {
+            answer.validateFor(
+                    new InvocationBuilder()
+                            .method("mixedVarargsReturningStringArray")
+                            .argTypes(Object.class, String[].class)
+                            .args(new Object(), new String[] {"A", "B", "C"})
+                            .toInvocation());
+            answer.validateFor(
+                    new InvocationBuilder()
+                            .method("mixedVarargsReturningStringArray")
+                            .argTypes(Object.class, String[].class)
+                            .args(new Object(), new String[] {})
+                            .toInvocation());
+            answer.validateFor(
+                    new InvocationBuilder()
+                            .method("mixedVarargsReturningStringArray")
+                            .argTypes(Object.class, String[].class)
+                            .args(new Object(), (Object) null)
+                            .toInvocation());
+            // covariant return type: String[] vararg returned as Object[]
+            answer.validateFor(
+                    new InvocationBuilder()
+                            .method("mixedVarargsReturningObjectArray")
+                            .argTypes(Object.class, String[].class)
+                            .args(new Object(), new String[] {"A"})
+                            .toInvocation());
+        }
+    }
+
+    @Test
+    public void should_still_reject_incompatible_return_type_when_stubbed_with_concrete_array()
+            throws Throwable {
+        // scalar return type: the last expanded vararg element is returned instead of the array
+        try {
+            new ReturnsArgumentAt(-1)
+                    .validateFor(
+                            new InvocationBuilder()
+                                    .method("varargs")
+                                    .argTypes(String[].class)
+                                    .args(new String[] {"A", "B"})
+                                    .toInvocation());
+            Assertions.fail("should scream");
+        } catch (WrongTypeOfReturnValue ignored) {
+        }
+    }
+
+    @Test
     public void should_raise_an_exception_if_index_is_not_in_allowed_range_at_creation_time()
             throws Throwable {
         try {

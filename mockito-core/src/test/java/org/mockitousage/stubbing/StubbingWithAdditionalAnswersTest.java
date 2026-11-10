@@ -79,6 +79,30 @@ public class StubbingWithAdditionalAnswersTest {
     }
 
     @Test
+    public void can_return_vararg_array_stubbed_with_concrete_array() throws Exception {
+        // regression test for #3893: stubbing with a concrete (empty or multi-element) vararg
+        // array must return that array by identity
+        String[] empty = {};
+        String[] single = {"single"};
+        String[] multiple = {"a", "b", "c"};
+        String[] nullArray = null;
+
+        given(iMethods.mixedVarargsReturningStringArray(eq(1), eq(empty)))
+                .will(returnsLastArg());
+        given(iMethods.mixedVarargsReturningStringArray(eq(2), eq(single)))
+                .will(returnsLastArg());
+        given(iMethods.mixedVarargsReturningStringArray(eq(3), eq(multiple)))
+                .will(returnsLastArg());
+        given(iMethods.mixedVarargsReturningStringArray(eq(4), eq(nullArray)))
+                .will(returnsArgAt(1));
+
+        assertThat(iMethods.mixedVarargsReturningStringArray(1, empty)).isSameAs(empty);
+        assertThat(iMethods.mixedVarargsReturningStringArray(2, single)).isSameAs(single);
+        assertThat(iMethods.mixedVarargsReturningStringArray(3, multiple)).isSameAs(multiple);
+        assertThat(iMethods.mixedVarargsReturningStringArray(4, nullArray)).isSameAs(nullArray);
+    }
+
+    @Test
     public void returns_arg_at_throws_on_out_of_range_var_args() throws Exception {
         given(iMethods.mixedVarargsReturningString(eq(1), any(String[].class)))
                 .will(returnsArgAt(3));
