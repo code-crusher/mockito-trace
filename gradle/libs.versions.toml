@@ -24,6 +24,7 @@ autoservice = { module = "com.google.auto.service:auto-service", version = "1.1.
 bnd-gradle = { module = "biz.aQute.bnd:biz.aQute.bnd.gradle", version.ref = "gradleplugin-aQute-bnd" }
 bytebuddy = { module = "net.bytebuddy:byte-buddy", version.ref = "bytebuddy" }
 bytebuddy-agent = { module = "net.bytebuddy:byte-buddy-agent", version.ref = "bytebuddy" }
+dexmaker = { module = "com.linkedin.dexmaker:dexmaker", version.ref = "dexmaker" }
 dexmaker-mockito-inline = { module = "com.linkedin.dexmaker:dexmaker-mockito-inline", version.ref = "dexmaker" }
 equinox = { module = "org.eclipse.platform:org.eclipse.osgi", version = "3.23.200" }
 errorprone = { module = "com.google.errorprone:error_prone_core", version.ref = "errorprone" }
