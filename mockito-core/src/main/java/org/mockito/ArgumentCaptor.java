@@ -149,6 +149,30 @@ public class ArgumentCaptor<T> {
     }
 
     /**
+     * Build a new <code>ArgumentCaptor</code>.
+     * <p>
+     * This is a plain static alias of {@link #forClass} that reads naturally when it is
+     * statically imported, in the same way other Mockito static utilities are:
+     * <pre class="code"><code class="java">
+     *   import static org.mockito.ArgumentCaptor.captorForClass;
+     *
+     *   ArgumentCaptor&lt;Person&gt; captor = captorForClass(Person.class);
+     *   verify(mock).doSomething(captor.capture());
+     *   assertEquals("John", captor.getValue().getName());
+     * </code></pre>
+     *
+     * @param clazz Type matching the parameter to be captured.
+     * @param <S> Type of clazz
+     * @param <U> Type of object captured by the newly built ArgumentCaptor
+     * @return A new ArgumentCaptor
+     * @see #forClass
+     * @since 5.25.0
+     */
+    public static <U, S extends U> ArgumentCaptor<U> captorForClass(Class<S> clazz) {
+        return forClass(clazz);
+    }
+
+    /**
      * Build a new <code>ArgumentCaptor</code> by inferring the class type.
      * <p>
      * This enables inferring the generic type of an argument captor without

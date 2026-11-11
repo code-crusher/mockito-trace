@@ -48,6 +48,43 @@ public class ArgumentCaptorTest {
     }
 
     @Test
+    public void captorForClass_builds_a_captor_like_forClass() throws Exception {
+        class Foo {}
+
+        ArgumentCaptor<Foo> fooCaptor = ArgumentCaptor.captorForClass(Foo.class);
+
+        assertThat(fooCaptor).isNotNull();
+        assertThat(fooCaptor.getCaptorType()).isEqualTo(Foo.class);
+    }
+
+    @Test
+    public void captorForClass_supports_subtype_capture() throws Exception {
+        class Foo {}
+
+        class Bar extends Foo {}
+
+        ArgumentCaptor<Foo> fooCaptor = ArgumentCaptor.captorForClass(Bar.class);
+
+        assertThat(fooCaptor.getCaptorType()).isEqualTo(Bar.class);
+    }
+
+    @Test
+    public void captorForClass_captures_arguments() throws Exception {
+        class FooService {
+            public void doSomething(Object foo) {}
+        }
+
+        FooService fooService = Mockito.mock(FooService.class);
+        Object foo = new Object();
+        fooService.doSomething(foo);
+
+        ArgumentCaptor<Object> captor = ArgumentCaptor.captorForClass(Object.class);
+        Mockito.verify(fooService).doSomething(captor.capture());
+
+        assertThat(captor.getValue()).isSameAs(foo);
+    }
+
+    @Test
     public void captor_calls_forClass_with_the_inferred_argument() throws Exception {
         ArgumentCaptor<Map<String, Object>> captor = ArgumentCaptor.captor();
         assertThat(captor.getCaptorType()).isEqualTo(Map.class);
