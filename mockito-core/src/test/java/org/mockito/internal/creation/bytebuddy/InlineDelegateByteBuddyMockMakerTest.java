@@ -291,10 +291,11 @@ public class InlineDelegateByteBuddyMockMakerTest
                                         element.getClassName()
                                                 .equals(ExceptionThrowingClass.class.getName()))
                         .collect(Collectors.toList());
-        assertEquals(3, exceptionClassElements.size());
+        // The synthetic frames of the advice inlined into the spy methods do not represent
+        // executed code and are therefore removed, see #3772.
+        assertEquals(2, exceptionClassElements.size());
         assertEquals("internalThrowException", exceptionClassElements.get(0).getMethodName());
-        assertEquals("internalThrowException", exceptionClassElements.get(1).getMethodName());
-        assertEquals("throwException", exceptionClassElements.get(2).getMethodName());
+        assertEquals("throwException", exceptionClassElements.get(1).getMethodName());
     }
 
     @Test
@@ -364,6 +365,37 @@ public class InlineDelegateByteBuddyMockMakerTest
         throwable.setStackTrace(new StackTraceElement[0]);
         assertThat(MockMethodAdvice.removeRecursiveCalls(throwable, SampleInterface.class))
                 .isSameAs(throwable);
+    }
+
+    /**
+     * The advice that is inlined into a mocked method has no line number, see #3772. Such a
+     * synthetic frame is removed if the same method was also really executed, but it is kept
+     * when the method was only invoked as a mock.
+     */
+    @Test
+    public void should_remove_synthetic_frames_of_inlined_advice() {
+        StackTraceElement[] stack =
+                new StackTraceElement[] {
+                    new StackTraceElement(SampleInterface.class.getName(), "real", "", 42),
+                    new StackTraceElement("foo", "", "", -1),
+                    new StackTraceElement(SampleInterface.class.getName(), "real", "", -1),
+                    new StackTraceElement(SampleInterface.class.getName(), "mocked", "", -1),
+                    new StackTraceElement("baz", "", "", -1)
+                };
+
+        Throwable throwable = new Throwable();
+        throwable.setStackTrace(stack);
+        throwable = MockMethodAdvice.removeRecursiveCalls(throwable, SampleInterface.class);
+
+        assertThat(throwable.getStackTrace())
+                .isEqualTo(
+                        new StackTraceElement[] {
+                            new StackTraceElement(SampleInterface.class.getName(), "real", "", 42),
+                            new StackTraceElement("foo", "", "", -1),
+                            new StackTraceElement(
+                                    SampleInterface.class.getName(), "mocked", "", -1),
+                            new StackTraceElement("baz", "", "", -1)
+                        });
     }
 
     @Test

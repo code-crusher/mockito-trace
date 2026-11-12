@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
@@ -96,7 +98,11 @@ public class MockMethodAdvice extends MockMethodDispatcher {
     }
 
     @SuppressWarnings("unused")
-    @Advice.OnMethodEnter(skipOn = Advice.OnNonDefaultValue.class)
+    // The advice is inlined at the beginning of the instrumented method. By default, Byte Buddy
+    // maps this prologue to the method's first source line, which makes debuggers stop at a
+    // breakpoint on that line even when the real method body is never executed, see #3772.
+    // Disabling the prepended line number keeps the original line number table intact.
+    @Advice.OnMethodEnter(skipOn = Advice.OnNonDefaultValue.class, prependLineNumber = false)
     private static Callable<?> enter(
             @Identifier String identifier,
             @Advice.This Object mock,
@@ -340,19 +346,36 @@ public class MockMethodAdvice extends MockMethodDispatcher {
     }
 
     static Throwable removeRecursiveCalls(final Throwable cause, final Class<?> declaringClass) {
+        final StackTraceElement[] stack = cause.getStackTrace();
+        final String declaringClassName = declaringClass.getName();
+        // Frames of real code carry a line number whereas the synthetic frames of the advice that
+        // is inlined into the method do not (see #3772). Collecting the methods that were really
+        // executed therefore allows to drop the synthetic frames without losing real ones.
+        final Set<String> executedMethods = new HashSet<>();
+        for (StackTraceElement element : stack) {
+            if (element.getLineNumber() >= 0) {
+                executedMethods.add(element.getClassName() + element.getMethodName());
+            }
+        }
         final List<String> uniqueStackTraceItems = new ArrayList<>();
-        final List<Integer> indexesToBeRemoved = new ArrayList<>();
-        for (StackTraceElement element : cause.getStackTrace()) {
+        final Set<Integer> indexesToBeRemoved = new HashSet<>();
+        for (int index = 0; index < stack.length; index++) {
+            final StackTraceElement element = stack[index];
             final String key = element.getClassName() + element.getLineNumber();
             final int elementIndex = uniqueStackTraceItems.lastIndexOf(key);
             uniqueStackTraceItems.add(key);
+            final boolean fromDeclaringClass = declaringClassName.equals(element.getClassName());
 
-            if (elementIndex > -1 && declaringClass.getName().equals(element.getClassName())) {
+            if (elementIndex > -1 && fromDeclaringClass) {
                 indexesToBeRemoved.add(elementIndex);
             }
+            if (element.getLineNumber() < 0
+                    && fromDeclaringClass
+                    && executedMethods.contains(element.getClassName() + element.getMethodName())) {
+                indexesToBeRemoved.add(index);
+            }
         }
-        final List<StackTraceElement> adjustedList =
-                new ArrayList<>(Arrays.asList(cause.getStackTrace()));
+        final List<StackTraceElement> adjustedList = new ArrayList<>(Arrays.asList(stack));
         indexesToBeRemoved.stream()
                 .sorted(Comparator.reverseOrder())
                 .mapToInt(Integer::intValue)
@@ -694,7 +717,7 @@ public class MockMethodAdvice extends MockMethodDispatcher {
     static class ForHashCode {
 
         @SuppressWarnings("unused")
-        @Advice.OnMethodEnter(skipOn = Advice.OnNonDefaultValue.class)
+        @Advice.OnMethodEnter(skipOn = Advice.OnNonDefaultValue.class, prependLineNumber = false)
         private static boolean enter(@Identifier String id, @Advice.This Object self) {
             MockMethodDispatcher dispatcher = MockMethodDispatcher.get(id, self);
             return dispatcher != null && dispatcher.isMock(self);
@@ -715,7 +738,7 @@ public class MockMethodAdvice extends MockMethodDispatcher {
     static class ForEquals {
 
         @SuppressWarnings("unused")
-        @Advice.OnMethodEnter(skipOn = Advice.OnNonDefaultValue.class)
+        @Advice.OnMethodEnter(skipOn = Advice.OnNonDefaultValue.class, prependLineNumber = false)
         private static boolean enter(@Identifier String identifier, @Advice.This Object self) {
             MockMethodDispatcher dispatcher = MockMethodDispatcher.get(identifier, self);
             return dispatcher != null && dispatcher.isMock(self);
@@ -737,7 +760,7 @@ public class MockMethodAdvice extends MockMethodDispatcher {
     static class ForStatic {
 
         @SuppressWarnings("unused")
-        @Advice.OnMethodEnter(skipOn = Advice.OnNonDefaultValue.class)
+        @Advice.OnMethodEnter(skipOn = Advice.OnNonDefaultValue.class, prependLineNumber = false)
         private static Callable<?> enter(
                 @Identifier String identifier,
                 @Advice.Origin Class<?> type,
