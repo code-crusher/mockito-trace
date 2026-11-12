@@ -694,6 +694,21 @@ import java.util.function.Function;
  * System.out.println(mock.someMethod("foo"));
  * </code></pre>
  *
+ * <p>
+ * When an {@link Answer} needs to behave differently depending on how many times it has been
+ * called, use {@link org.mockito.invocation.InvocationOnMock#getInvocationCount()}. The count is
+ * 1-based and includes the current invocation:
+ *
+ * <pre class="code"><code class="java">
+ * //Fails the first two calls, then returns 200
+ * when(mock.someMethod(anyString())).thenAnswer(invocation -&gt; {
+ *     if (invocation.getInvocationCount() &lt;= 2) {
+ *         throw new RuntimeException("not ready yet");
+ *     }
+ *     return 200;
+ * });
+ * </code></pre>
+ *
  *
  *
  *
