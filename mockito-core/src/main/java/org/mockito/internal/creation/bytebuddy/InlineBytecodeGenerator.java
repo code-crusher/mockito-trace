@@ -14,6 +14,7 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.method.MethodList;
 import net.bytebuddy.description.method.ParameterDescription;
 import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.description.type.TypeList;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.scaffold.MethodGraph;
 import net.bytebuddy.dynamic.scaffold.TypeValidation;
@@ -421,13 +422,9 @@ public class InlineBytecodeGenerator implements BytecodeGenerator, ClassFileTran
             try {
                 return byteBuddy
                         .redefine(
-                                classBeingRedefined,
-                                //        new ClassFileLocator.Compound(
+                                WithoutDeclaredTypes.of(classBeingRedefined),
                                 ClassFileLocator.Simple.of(
-                                        classBeingRedefined.getName(), classfileBuffer)
-                                //            ,ClassFileLocator.ForClassLoader.ofSystemLoader()
-                                //        )
-                                )
+                                        classBeingRedefined.getName(), classfileBuffer))
                         // Note: The VM erases parameter meta data from the provided class file
                         // (bug). We just add this information manually.
                         .visit(new ParameterWritingVisitorWrapper(classBeingRedefined))
@@ -474,6 +471,44 @@ public class InlineBytecodeGenerator implements BytecodeGenerator, ClassFileTran
         } finally {
             clearing.remove();
             clearingException.remove();
+        }
+    }
+
+    /**
+     * A type description that hides the nested types of a loaded type. Byte Buddy writes the
+     * {@code InnerClasses} attribute from the described nested types, so describing them requires
+     * loading them: {@link Class#getDeclaredClasses()} loads every nested type eagerly and fails if
+     * any of them cannot be loaded, for instance a Kotlin {@code DefaultImpls} class that declares
+     * duplicate fields (see <a href="https://github.com/mockito/mockito/issues/3645">#3645</a>).
+     * The nested types are not needed when redefining a type for mocking, and the attribute is
+     * retained from the instrumented class file instead.
+     */
+    private static class WithoutDeclaredTypes
+            extends TypeDescription.AbstractBase.OfSimpleType.WithDelegation {
+
+        private final TypeDescription delegate;
+
+        private WithoutDeclaredTypes(TypeDescription delegate) {
+            this.delegate = delegate;
+        }
+
+        static TypeDescription of(Class<?> type) {
+            return new WithoutDeclaredTypes(TypeDescription.ForLoadedType.of(type));
+        }
+
+        @Override
+        protected TypeDescription delegate() {
+            return delegate;
+        }
+
+        @Override
+        public String getName() {
+            return delegate.getName();
+        }
+
+        @Override
+        public TypeList getDeclaredTypes() {
+            return new TypeList.Empty();
         }
     }
 
