@@ -21,6 +21,7 @@ import org.mockito.internal.util.Platform;
 import org.mockito.internal.util.collections.WeakIdentityMap;
 import org.mockito.internal.util.concurrent.DetachedThreadLocal;
 import org.mockito.internal.util.concurrent.WeakConcurrentMap;
+import org.mockito.internal.util.reflection.LenientCopyTool;
 import org.mockito.invocation.MockHandler;
 import org.mockito.mock.MockCreationSettings;
 import org.mockito.plugins.InlineMockMaker;
@@ -861,10 +862,17 @@ class InlineDelegateByteBuddyMockMaker
                             type,
                             (object, context) -> {
                                 ((InlineConstructionMockContext) context).count = ++count;
+                                MockCreationSettings<T> settings = settingsFactory.apply(context);
+                                // Construction mocks skip the real constructor body, so fields
+                                // would stay uninitialized. When the settings ask for a
+                                // constructor, invoke it on a temporary instance and copy the
+                                // resulting state (including final fields) onto the mock.
+                                if (settings.isUsingConstructor()) {
+                                    initializeFromConstructor(object, settings);
+                                }
                                 MockMethodInterceptor interceptor =
                                         new MockMethodInterceptor(
-                                                handlerFactory.apply(context),
-                                                settingsFactory.apply(context));
+                                                handlerFactory.apply(context), settings);
                                 mocks.put(object, interceptor);
                                 try {
                                     @SuppressWarnings("unchecked")
@@ -908,6 +916,19 @@ class InlineDelegateByteBuddyMockMaker
         @SuppressWarnings("unchecked")
         public List<T> getMocks() {
             return (List<T>) all;
+        }
+
+        private void initializeFromConstructor(Object object, MockCreationSettings<T> settings) {
+            // Construction interception is suspended while the interceptor is applied, so
+            // invoking the constructor here does not intercept the temporary instance.
+            T constructed =
+                    new ConstructorInstantiator(
+                                    settings.getOuterClassInstance() != null,
+                                    settings.getConstructorArgs())
+                            .newInstance(type);
+            @SuppressWarnings("unchecked")
+            T cast = (T) object;
+            new LenientCopyTool().copyToMock(constructed, cast);
         }
     }
 

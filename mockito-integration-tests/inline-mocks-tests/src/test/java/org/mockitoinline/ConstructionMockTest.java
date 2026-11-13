@@ -8,6 +8,7 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNull;
 import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -190,6 +191,123 @@ public final class ConstructionMockTest {
                 .hasMessageContaining("you cannot override the MockMaker for construction mocks");
     }
 
+    /**
+     * Tests issue #3811: useConstructor is honored by construction mocks.
+     */
+    @Test
+    public void testConstructionMockWithUseConstructor() {
+        try (MockedConstruction<WithFinalField> ignored =
+                Mockito.mockConstruction(
+                        WithFinalField.class,
+                        withSettings()
+                                .useConstructor("initialized")
+                                .defaultAnswer(CALLS_REAL_METHODS))) {
+            // The constructor is invoked with the configured arguments, not the intercepted ones.
+            WithFinalField mock = new WithFinalField("from-new");
+            assertEquals("initialized", mock.getValue());
+        }
+    }
+
+    /**
+     * Tests issue #3811: constructor arguments can be forwarded from the construction context.
+     */
+    @Test
+    public void testConstructionMockWithUseConstructorFromContext() {
+        try (MockedConstruction<WithFinalField> ignored =
+                Mockito.mockConstruction(
+                        WithFinalField.class,
+                        context ->
+                                withSettings()
+                                        .useConstructor(context.arguments().get(0))
+                                        .defaultAnswer(CALLS_REAL_METHODS))) {
+            WithFinalField mock = new WithFinalField("from-new");
+            assertEquals("from-new", mock.getValue());
+        }
+    }
+
+    /**
+     * Tests issue #3811: multiple constructor arguments, as in the reported MasterClient case.
+     */
+    @Test
+    public void testConstructionMockWithUseConstructorMultipleArgs() {
+        try (MockedConstruction<WithMultipleConstructorArgs> ignored =
+                Mockito.mockConstruction(
+                        WithMultipleConstructorArgs.class,
+                        context ->
+                                withSettings()
+                                        .useConstructor(
+                                                context.arguments().get(0),
+                                                context.arguments().get(1),
+                                                true)
+                                        .defaultAnswer(CALLS_REAL_METHODS))) {
+            WithMultipleConstructorArgs mock = new WithMultipleConstructorArgs("a", 2, false);
+            assertEquals("a", mock.getName());
+            assertEquals(2, mock.getCount());
+            assertTrue(mock.isEnabled());
+        }
+    }
+
+    /**
+     * Tests issue #3811: the constructor is actually invoked, including for inherited state.
+     */
+    @Test
+    public void testConstructionMockWithUseConstructorInitializesInheritedFields() {
+        SubWithFinalField.constructorInvocations = 0;
+        try (MockedConstruction<SubWithFinalField> ignored =
+                Mockito.mockConstruction(
+                        SubWithFinalField.class,
+                        withSettings()
+                                .useConstructor("initialized", 42)
+                                .defaultAnswer(CALLS_REAL_METHODS))) {
+            SubWithFinalField mock = new SubWithFinalField("from-new", 0);
+            assertEquals("initialized", mock.getValue());
+            assertEquals(42, mock.getNumber());
+            assertEquals(1, SubWithFinalField.constructorInvocations);
+        }
+    }
+
+    /**
+     * Tests issue #3811: real methods work on the constructed mock because the final field
+     * was initialized by the constructor.
+     */
+    @Test
+    public void testConstructionMockWithUseConstructorSupportsRealMethods() {
+        try (MockedConstruction<WithFinalField> ignored =
+                Mockito.mockConstruction(
+                        WithFinalField.class,
+                        context ->
+                                withSettings()
+                                        .useConstructor(context.arguments().get(0))
+                                        .defaultAnswer(CALLS_REAL_METHODS))) {
+            assertEquals("from-new", new WithFinalField("from-new").getValue());
+        }
+    }
+
+    @Test
+    public void testConstructionMockWithUseConstructorFailsForMissingConstructor() {
+        assertThatThrownBy(
+                        () -> {
+                            try (MockedConstruction<WithFinalField> ignored =
+                                    Mockito.mockConstruction(
+                                            WithFinalField.class,
+                                            withSettings().useConstructor(42))) {
+                                new WithFinalField("from-new");
+                            }
+                        })
+                .isInstanceOf(MockitoException.class)
+                .hasMessageContaining("Unable to create instance of 'WithFinalField'");
+    }
+
+    @Test
+    public void testConstructionMockWithoutUseConstructorLeavesFieldsUninitialized() {
+        try (MockedConstruction<WithFinalField> ignored =
+                Mockito.mockConstruction(
+                        WithFinalField.class, withSettings().defaultAnswer(CALLS_REAL_METHODS))) {
+            WithFinalField mock = new WithFinalField("from-new");
+            assertNull(mock.getValue());
+        }
+    }
+
     static class Dummy {
 
         public Dummy() {}
@@ -198,6 +316,61 @@ public final class ConstructionMockTest {
 
         String foo() {
             return "foo";
+        }
+    }
+
+    static class WithFinalField {
+
+        private final String value;
+
+        WithFinalField(String value) {
+            this.value = value;
+        }
+
+        String getValue() {
+            return value;
+        }
+    }
+
+    static class SubWithFinalField extends WithFinalField {
+
+        static int constructorInvocations;
+
+        private final int number;
+
+        SubWithFinalField(String value, int number) {
+            super(value);
+            this.number = number;
+            constructorInvocations++;
+        }
+
+        int getNumber() {
+            return number;
+        }
+    }
+
+    static class WithMultipleConstructorArgs {
+
+        private final String name;
+        private final int count;
+        private final boolean enabled;
+
+        WithMultipleConstructorArgs(String name, int count, boolean enabled) {
+            this.name = name;
+            this.count = count;
+            this.enabled = enabled;
+        }
+
+        String getName() {
+            return name;
+        }
+
+        int getCount() {
+            return count;
+        }
+
+        boolean isEnabled() {
+            return enabled;
         }
     }
 }

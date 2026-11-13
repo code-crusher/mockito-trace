@@ -1734,6 +1734,18 @@ import java.util.function.Function;
  * Due to the defined scope of the mocked construction, object construction returns to its original behavior once the scope is
  * released. To define mock behavior and to verify method invocations, use the <code>MockedConstruction</code> that is returned.
  * <p>
+ * By default, construction mocks skip the real constructor body, so fields (including <code>final</code> fields) remain
+ * uninitialized. To initialize them, request a constructor via {@link MockSettings#useConstructor(Object...)}, optionally
+ * forwarding the intercepted constructor arguments from {@link MockedConstruction.Context}:
+ *
+ * <pre class="code"><code class="java">
+ * try (MockedConstruction&lt;Foo&gt; mocked = mockConstruction(Foo.class,
+ *         context -&gt; withSettings().useConstructor(context.arguments().get(0)))) {
+ * Foo foo = new Foo("value");
+ * assertEquals("value", foo.getValue());
+ * }
+ * </code></pre>
+ * <p>
  *
  * <h3 id="50">50. <a class="meaningful_link" href="#proxy_mock_maker" name="proxy_mock_maker">Avoiding code generation when only interfaces are mocked</a> (since 3.12.2)</h3>
  *
