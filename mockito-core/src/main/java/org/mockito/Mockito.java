@@ -2421,6 +2421,35 @@ public class Mockito extends ArgumentMatchers {
      * Please refer to the documentation of {@link #spy(Object)}.
      * Overusing spies hints at code design smells.
      * <p>
+     * This method, in contrast to the original {@link #spy(Object)}, allows to pass
+     * {@link MockSettings} to the spy. It is particularly useful when a common set of settings
+     * (e.g. a mock name) should be applied to multiple spies, for example when a spy is created
+     * for each test method.
+     * <pre class="code"><code class="java">
+     *   MockSettings settings = withSettings().name("spy");
+     *   Foo spy = spy(settings, new Foo());
+     * </code></pre>
+     *
+     * @param settings the settings to apply to the spy
+     * @param object to spy on
+     * @param <T> type of the spy
+     * @return a spy of the real object
+     * @since 5.25.0
+     */
+    public static <T> T spy(MockSettings settings, T object) {
+        if (MockUtil.isMock(object)) {
+            throw new IllegalArgumentException(
+                    "Please don't pass mock here. Spy is not allowed on mock.");
+        }
+        return MOCKITO_CORE.mock(
+                (Class<T>) object.getClass(),
+                settings.spiedInstance(object).defaultAnswer(CALLS_REAL_METHODS));
+    }
+
+    /**
+     * Please refer to the documentation of {@link #spy(Object)}.
+     * Overusing spies hints at code design smells.
+     * <p>
      * This method, in contrast to the original {@link #spy(Object)}, creates a spy based on class instead of an object.
      * Sometimes it is more convenient to create spy based on the class and avoid providing an instance of a spied object.
      * This is particularly useful for spying on abstract classes because they cannot be instantiated.

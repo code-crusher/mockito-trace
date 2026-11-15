@@ -178,6 +178,40 @@ public class SpyingOnRealObjectsTest extends TestBase {
     }
 
     @Test
+    public void shouldSpyWithSettings() {
+        // when
+        List<String> spy =
+                Mockito.spy(Mockito.withSettings().name("my cool spy"), new LinkedList<String>());
+
+        // then the spy still calls real methods
+        spy.add("one");
+        assertEquals("one", spy.get(0));
+
+        // and the settings are applied
+        try {
+            verify(spy).add("two");
+            fail();
+        } catch (AssertionError e) {
+            assertThat(e).hasMessageContaining("my cool spy");
+        }
+    }
+
+    @SuppressWarnings({"CheckReturnValue", "MockitoUsage"})
+    @Test
+    public void shouldSayNiceMessageWhenSpyingOnMockWithSettings() {
+        // when
+        List<String> mock = Mockito.mock(List.class);
+
+        // then
+        try {
+            Mockito.spy(Mockito.withSettings(), mock);
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e).hasMessageContaining("Please don't pass mock here");
+        }
+    }
+
+    @Test
     public void shouldSayNiceMessageWhenSpyingOnPrivateClass() throws Exception {
         List<String> real = Arrays.asList("first", "second");
         try {
