@@ -23,6 +23,7 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.exceptions.base.MockitoException;
 import org.mockito.internal.configuration.plugins.Plugins;
+import org.mockito.internal.util.reflection.AnnotationSupport;
 import org.mockito.plugins.AnnotationEngine;
 import org.mockito.plugins.MemberAccessor;
 
@@ -52,8 +53,8 @@ public class SpyAnnotationEngine implements AnnotationEngine {
         Field[] fields = context.getDeclaredFields();
         MemberAccessor accessor = Plugins.getMemberAccessor();
         for (Field field : fields) {
-            if (field.isAnnotationPresent(Spy.class)
-                    && !field.isAnnotationPresent(InjectMocks.class)) {
+            if (AnnotationSupport.isAnnotated(field, Spy.class)
+                    && !AnnotationSupport.isAnnotated(field, InjectMocks.class)) {
                 assertNoIncompatibleAnnotations(Spy.class, field, Mock.class, Captor.class);
                 Object instance;
                 try {
@@ -83,7 +84,8 @@ public class SpyAnnotationEngine implements AnnotationEngine {
                         .genericTypeToMock(field.getGenericType())
                         .defaultAnswer(CALLS_REAL_METHODS)
                         .name(field.getName());
-        SpyAnnotationUtil.applyMockMaker(field, settings);
+        SpyAnnotationUtil.applyMockMaker(
+                AnnotationSupport.findAnnotation(field, Spy.class), settings);
         Class<?> type = field.getType();
         if (type.isInterface()) {
             return Mockito.mock(type, settings.useConstructor());
@@ -150,7 +152,7 @@ public class SpyAnnotationEngine implements AnnotationEngine {
             Field field,
             Class<? extends Annotation>... undesiredAnnotations) {
         for (Class<? extends Annotation> u : undesiredAnnotations) {
-            if (field.isAnnotationPresent(u)) {
+            if (AnnotationSupport.isAnnotated(field, u)) {
                 throw unsupportedCombinationOfAnnotations(
                         annotation.getSimpleName(), u.getSimpleName());
             }

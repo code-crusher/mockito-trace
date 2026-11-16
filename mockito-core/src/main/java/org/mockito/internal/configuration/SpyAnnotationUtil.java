@@ -13,6 +13,7 @@ import org.mockito.MockSettings;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.internal.util.MockUtil;
+import org.mockito.internal.util.reflection.AnnotationSupport;
 import org.mockito.plugins.MemberAccessor;
 
 /**
@@ -61,21 +62,20 @@ public final class SpyAnnotationUtil {
                         .spiedInstance(instance)
                         .defaultAnswer(CALLS_REAL_METHODS)
                         .name(field.getName());
-        applyMockMaker(field, settings);
+        applyMockMaker(AnnotationSupport.findAnnotation(field, Spy.class), settings);
         return Mockito.mock(instance.getClass(), settings);
     }
 
     /**
-     * Applies the {@link Spy#mockMaker()} of the field, if any, to the given settings so that a spy
-     * can opt into a specific {@link org.mockito.plugins.MockMaker}.
+     * Applies the {@link Spy#mockMaker()} of the given spy annotation, if any, to the given settings
+     * so that a spy can opt into a specific {@link org.mockito.plugins.MockMaker}.
      *
-     * @param field the {@code @Spy} annotated field
+     * @param spy the {@code @Spy} annotation found on the field, may be {@code null}
      * @param settings the settings to apply the mock maker to; untouched if no mock maker specified
      */
-    static void applyMockMaker(Field field, MockSettings settings) {
-        String mockMaker = field.getAnnotation(Spy.class).mockMaker();
-        if (!mockMaker.isEmpty()) {
-            settings.mockMaker(mockMaker);
+    static void applyMockMaker(Spy spy, MockSettings settings) {
+        if (spy != null && !spy.mockMaker().isEmpty()) {
+            settings.mockMaker(spy.mockMaker());
         }
     }
 }

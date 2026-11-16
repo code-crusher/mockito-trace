@@ -12,6 +12,7 @@ import java.util.Set;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.internal.util.MockUtil;
+import org.mockito.internal.util.reflection.AnnotationSupport;
 import org.mockito.internal.util.reflection.FieldReader;
 
 /**
@@ -76,7 +77,8 @@ public class MockScanner {
     }
 
     private boolean isAnnotatedByMockOrSpy(Field field) {
-        return field.isAnnotationPresent(Spy.class) || field.isAnnotationPresent(Mock.class);
+        return AnnotationSupport.isAnnotated(field, Spy.class)
+                || AnnotationSupport.isAnnotated(field, Mock.class);
     }
 
     private boolean isMockOrSpy(Object instance) {

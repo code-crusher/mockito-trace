@@ -4,6 +4,7 @@
  */
 package org.mockito;
 
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -129,7 +130,7 @@ import org.mockito.plugins.MockMaker;
  * @since 1.8.3
  */
 @Retention(RUNTIME)
-@Target(FIELD)
+@Target({FIELD, ANNOTATION_TYPE})
 @Documented
 public @interface Spy {
 

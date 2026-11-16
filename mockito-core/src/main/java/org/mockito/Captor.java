@@ -46,6 +46,6 @@ import java.lang.annotation.Target;
  * @since 1.8.3
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.ANNOTATION_TYPE})
 @Documented
 public @interface Captor {}

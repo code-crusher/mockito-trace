@@ -14,6 +14,7 @@ import java.util.Set;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.internal.util.reflection.AnnotationSupport;
 
 /**
  * Scan field for injection.
@@ -49,7 +50,7 @@ public class InjectMocksScanner {
         Set<Field> mockDependentFields = new HashSet<>();
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
-            if (null != field.getAnnotation(InjectMocks.class)) {
+            if (AnnotationSupport.isAnnotated(field, InjectMocks.class)) {
                 assertNoAnnotations(field, Mock.class, Captor.class);
                 mockDependentFields.add(field);
             }
@@ -61,7 +62,7 @@ public class InjectMocksScanner {
     private static void assertNoAnnotations(
             Field field, Class<? extends Annotation>... annotations) {
         for (Class<? extends Annotation> annotation : annotations) {
-            if (field.isAnnotationPresent(annotation)) {
+            if (AnnotationSupport.isAnnotated(field, annotation)) {
                 throw unsupportedCombinationOfAnnotations(
                         annotation.getSimpleName(), InjectMocks.class.getSimpleName());
             }

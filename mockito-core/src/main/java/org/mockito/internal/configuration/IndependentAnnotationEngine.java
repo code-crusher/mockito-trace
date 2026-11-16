@@ -19,6 +19,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.ScopedMock;
 import org.mockito.exceptions.base.MockitoException;
 import org.mockito.internal.configuration.plugins.Plugins;
+import org.mockito.internal.util.reflection.AnnotationSupport;
 import org.mockito.plugins.AnnotationEngine;
 import org.mockito.plugins.MemberAccessor;
 
@@ -68,7 +69,7 @@ public class IndependentAnnotationEngine implements AnnotationEngine {
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
             boolean alreadyAssigned = false;
-            for (Annotation annotation : field.getAnnotations()) {
+            for (Annotation annotation : AnnotationSupport.findAll(field)) {
                 Object mock = createMockFor(annotation, field);
                 if (mock instanceof ScopedMock) {
                     scopedMocks.add((ScopedMock) mock);

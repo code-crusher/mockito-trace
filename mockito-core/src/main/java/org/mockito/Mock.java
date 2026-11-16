@@ -4,6 +4,7 @@
  */
 package org.mockito;
 
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
@@ -71,7 +72,7 @@ import org.mockito.stubbing.Answer;
  * @see MockitoAnnotations#openMocks(Object)
  * @see MockitoJUnitRunner
  */
-@Target({FIELD, PARAMETER})
+@Target({FIELD, PARAMETER, ANNOTATION_TYPE})
 @Retention(RUNTIME)
 @Documented
 public @interface Mock {

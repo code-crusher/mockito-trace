@@ -4,6 +4,7 @@
  */
 package org.mockito;
 
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -170,6 +171,6 @@ import org.mockito.junit.MockitoJUnitRunner;
  * @since 1.8.3
  */
 @Documented
-@Target(FIELD)
+@Target({FIELD, ANNOTATION_TYPE})
 @Retention(RUNTIME)
 public @interface InjectMocks {}

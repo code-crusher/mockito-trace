@@ -11,6 +11,7 @@ import org.mockito.Spy;
 import org.mockito.exceptions.base.MockitoException;
 import org.mockito.internal.configuration.SpyAnnotationUtil;
 import org.mockito.internal.configuration.plugins.Plugins;
+import org.mockito.internal.util.reflection.AnnotationSupport;
 import org.mockito.internal.util.reflection.FieldReader;
 import org.mockito.plugins.MemberAccessor;
 
@@ -30,7 +31,7 @@ public class SpyOnInjectedFieldsHandler extends MockInjectionStrategy {
     protected boolean processInjection(Field field, Object fieldOwner, Set<Object> mockCandidates) {
         FieldReader fieldReader = new FieldReader(fieldOwner, field);
 
-        if (!fieldReader.isNull() && field.isAnnotationPresent(Spy.class)) {
+        if (!fieldReader.isNull() && AnnotationSupport.isAnnotated(field, Spy.class)) {
             try {
                 SpyAnnotationUtil.resetOrCreateSpy(field, fieldReader.read(), accessor, fieldOwner);
             } catch (Exception e) {
