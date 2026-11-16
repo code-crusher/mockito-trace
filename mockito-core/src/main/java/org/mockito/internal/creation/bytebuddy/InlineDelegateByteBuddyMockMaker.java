@@ -492,6 +492,26 @@ class InlineDelegateByteBuddyMockMaker
                             ""),
                     generationFailed);
         }
+        String missingClass = MockMakerErrorUtils.findMissingClass(generationFailed);
+        if (missingClass != null) {
+            throw new MockitoException(
+                    join(
+                            "Mockito cannot mock this class: " + typeToMock + ".",
+                            "",
+                            "The type itself is mockable, but a class it references is missing from the classpath:",
+                            "  " + missingClass,
+                            "",
+                            "This is most likely a dependency issue: the class defining the mocked type",
+                            "references another type (e.g. in a method signature) that is provided by a",
+                            "different artifact which is not on your classpath.",
+                            "Please check that all dependencies of the mocked type are declared and compatible.",
+                            "",
+                            "You are seeing this disclaimer because Mockito is configured to create inlined mocks.",
+                            "You can learn about inline mocks and their limitations under item #39 of the Mockito class javadoc.",
+                            "",
+                            "Underlying exception : " + generationFailed),
+                    generationFailed);
+        }
         throw new MockitoException(
                 join(
                         "Mockito cannot mock this class: " + typeToMock + ".",

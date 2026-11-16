@@ -8,7 +8,10 @@ import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.ClassFileVersion;
 import net.bytebuddy.description.modifier.TypeManifestation;
 import net.bytebuddy.dynamic.DynamicType;
+import net.bytebuddy.jar.asm.ClassWriter;
+import net.bytebuddy.jar.asm.MethodVisitor;
 import org.junit.Test;
+import org.mockito.exceptions.base.MockitoException;
 import org.mockito.internal.creation.MockSettingsImpl;
 import org.mockito.plugins.MockMaker;
 
@@ -18,7 +21,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Observable;
 import java.util.Observer;
 
+import static net.bytebuddy.jar.asm.Opcodes.ACC_ABSTRACT;
+import static net.bytebuddy.jar.asm.Opcodes.ACC_INTERFACE;
+import static net.bytebuddy.jar.asm.Opcodes.ACC_PUBLIC;
+import static net.bytebuddy.jar.asm.Opcodes.V1_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.mockitoutil.ClassLoaders.inMemoryClassLoader;
 
 public class SubclassByteBuddyMockMakerTest
         extends AbstractByteBuddyMockMakerTest<SubclassByteBuddyMockMaker> {
@@ -191,6 +200,61 @@ public class SubclassByteBuddyMockMakerTest
     @Override
     protected Class<?> mockTypeOf(Class<?> type) {
         return type.getSuperclass();
+    }
+
+    /**
+     * @see <a
+     *     href="https://github.com/mockito/mockito/issues/3487">https://github.com/mockito/mockito/issues/3487</a>
+     */
+    @Test
+    public void mock_interface_referencing_missing_class_reports_missing_class() throws Exception {
+        // given an interface whose method signature references a class that is not on the
+        // classpath, mimicking an incomplete dependency setup such as a partial servlet-api jar
+        ClassLoader classLoaderWithoutReferencedClass =
+                inMemoryClassLoader()
+                        .withClassDefinition(
+                                "foo.ReferencingInterface", interfaceReferencingMissingClass())
+                        .build();
+        Class<?> referencing =
+                classLoaderWithoutReferencedClass.loadClass("foo.ReferencingInterface");
+
+        MockSettingsImpl<?> mockSettings = new MockSettingsImpl<>();
+        //noinspection rawtypes
+        mockSettings.setTypeToMock((Class) referencing);
+
+        // when
+        try {
+            //noinspection unchecked
+            mockMaker.createMock(mockSettings, dummyHandler());
+            fail("Expected a MockitoException");
+        } catch (MockitoException e) {
+            // then the error message points at the missing class instead of suggesting
+            // a final or private class problem
+            assertThat(e)
+                    .hasMessageContaining("a class it references is missing from the classpath")
+                    .hasMessageContaining("foo.Missing");
+        }
+    }
+
+    /**
+     * Generates the bytecode of an interface with a method whose return type is
+     * <code>foo.Missing</code>, a class that is not defined anywhere.
+     */
+    private static byte[] interfaceReferencingMissingClass() {
+        ClassWriter classWriter = new ClassWriter(0);
+        classWriter.visit(
+                V1_8,
+                ACC_PUBLIC | ACC_INTERFACE | ACC_ABSTRACT,
+                "foo/ReferencingInterface",
+                null,
+                "java/lang/Object",
+                null);
+        MethodVisitor methodVisitor =
+                classWriter.visitMethod(
+                        ACC_PUBLIC | ACC_ABSTRACT, "getValue", "()Lfoo/Missing;", null, null);
+        methodVisitor.visitEnd();
+        classWriter.visitEnd();
+        return classWriter.toByteArray();
     }
 
     @Retention(RetentionPolicy.RUNTIME)

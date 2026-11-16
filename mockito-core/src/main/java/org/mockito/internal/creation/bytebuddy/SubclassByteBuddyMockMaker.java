@@ -112,6 +112,23 @@ public class SubclassByteBuddyMockMaker implements ClassCreatingMockMaker {
                             ""),
                     generationFailed);
         }
+        String missingClass = MockMakerErrorUtils.findMissingClass(generationFailed);
+        if (missingClass != null) {
+            throw new MockitoException(
+                    join(
+                            "Mockito cannot mock this class: " + mockFeatures.getTypeToMock() + ".",
+                            "",
+                            "The type itself is mockable, but a class it references is missing from the classpath:",
+                            "  " + missingClass,
+                            "",
+                            "This is most likely a dependency issue: the class defining the mocked type",
+                            "references another type (e.g. in a method signature) that is provided by a",
+                            "different artifact which is not on your classpath.",
+                            "Please check that all dependencies of the mocked type are declared and compatible.",
+                            "",
+                            "Underlying exception : " + generationFailed),
+                    generationFailed);
+        }
         throw new MockitoException(
                 join(
                         "Mockito cannot mock this class: " + mockFeatures.getTypeToMock() + ".",
