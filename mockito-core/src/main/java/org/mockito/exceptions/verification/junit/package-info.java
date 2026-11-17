@@ -9,4 +9,5 @@
  *
  * See also org.mockito.exceptions.verification.opentest4j
  */
+@org.mockito.CheckReturnValue
 package org.mockito.exceptions.verification.junit;

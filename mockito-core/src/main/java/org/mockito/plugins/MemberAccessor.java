@@ -9,6 +9,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.mockito.CanIgnoreReturnValue;
+
 /**
  * A member accessor is responsible for invoking methods, constructors and for setting
  * and reading field values.
@@ -18,12 +20,14 @@ public interface MemberAccessor {
     Object newInstance(Constructor<?> constructor, Object... arguments)
             throws InstantiationException, InvocationTargetException, IllegalAccessException;
 
+    @CanIgnoreReturnValue
     default Object newInstance(
             Constructor<?> constructor, OnConstruction onConstruction, Object... arguments)
             throws InstantiationException, InvocationTargetException, IllegalAccessException {
         return onConstruction.invoke(() -> newInstance(constructor, arguments));
     }
 
+    @CanIgnoreReturnValue
     Object invoke(Method method, Object target, Object... arguments)
             throws InvocationTargetException, IllegalAccessException;
 

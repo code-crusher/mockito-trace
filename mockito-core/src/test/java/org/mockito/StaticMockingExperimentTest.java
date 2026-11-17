@@ -155,7 +155,7 @@ public class StaticMockingExperimentTest extends TestBase {
                                 staticMethod,
                                 realMethod,
                                 "foo");
-        handler.handle(invocation);
+        Object unused = handler.handle(invocation);
 
         // register stubbing
         when(null).thenReturn("hey");
@@ -192,7 +192,7 @@ public class StaticMockingExperimentTest extends TestBase {
                                 staticMethod,
                                 realMethod,
                                 "foo");
-        handler.handle(invocation);
+        Object unused = handler.handle(invocation);
 
         // validate stubbed return value
         assertEquals("hey", handler.handle(invocation));
@@ -226,7 +226,7 @@ public class StaticMockingExperimentTest extends TestBase {
                                 staticMethod,
                                 realMethod,
                                 "foo");
-        handler.handle(invocation);
+        Object unused = handler.handle(invocation);
 
         // fails now because we have one static invocation recorded
         try {
@@ -253,7 +253,7 @@ public class StaticMockingExperimentTest extends TestBase {
                                 realMethod,
                                 ctr,
                                 "foo");
-        handler.handle(constructor);
+        Object unused = handler.handle(constructor);
 
         // test stubbing
         Object result = handler.handle(constructor);

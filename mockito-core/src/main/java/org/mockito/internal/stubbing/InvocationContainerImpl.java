@@ -4,6 +4,8 @@
  */
 package org.mockito.internal.stubbing;
 
+import org.mockito.CanIgnoreReturnValue;
+
 import static org.mockito.internal.progress.ThreadSafeMockingProgress.mockingProgress;
 
 import java.io.Serializable;
@@ -57,6 +59,7 @@ public class InvocationContainerImpl implements InvocationContainer, Serializabl
     }
 
     /** Adds new stubbed answer and returns the invocation matcher the answer was added to. */
+    @CanIgnoreReturnValue
     public StubbedInvocationMatcher addAnswer(
             Answer<?> answer, boolean isConsecutive, Strictness stubbingStrictness) {
         Invocation invocation = invocationForStubbing.getInvocation();

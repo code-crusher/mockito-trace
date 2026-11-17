@@ -267,8 +267,8 @@ public class MocksSerializationTest extends TestBase implements Serializable {
         private String string;
 
         public Object answer(InvocationOnMock invocation) throws Throwable {
-            invocation.getArguments();
-            invocation.getMock();
+            Object[] unused = invocation.getArguments();
+            Object unusedMock = invocation.getMock();
             return string;
         }
     }
@@ -317,7 +317,7 @@ public class MocksSerializationTest extends TestBase implements Serializable {
 
         // then
         Any readObject = deserializeMock(serialized, Any.class);
-        readObject.matches("");
+        boolean unused = readObject.matches("");
     }
 
     class AlreadySerializable implements Serializable {}

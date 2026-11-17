@@ -22,6 +22,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.exceptions.base.MockitoException;
+import org.mockito.internal.util.reflection.FieldInitializationReport;
 import org.mockito.internal.util.reflection.FieldInitializer.ConstructorArgumentResolver;
 import org.mockito.internal.util.reflection.FieldInitializer.ParameterizedConstructorInstantiator;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -50,7 +51,8 @@ public class ParameterizedConstructorInstantiatorTest {
 
     @Test
     public void should_be_created_with_an_argument_resolver() throws Exception {
-        new ParameterizedConstructorInstantiator(this, field("whateverForNow"), resolver);
+        ParameterizedConstructorInstantiator ignored =
+                new ParameterizedConstructorInstantiator(this, field("whateverForNow"), resolver);
     }
 
     @Test
@@ -76,8 +78,10 @@ public class ParameterizedConstructorInstantiatorTest {
         given(resolver.resolveTypeInstances(ArgumentMatchers.any(Class[].class)))
                 .willReturn(new Object[] {observer, map});
 
-        new ParameterizedConstructorInstantiator(this, field("withMultipleConstructor"), resolver)
-                .instantiate();
+        FieldInitializationReport ignored =
+                new ParameterizedConstructorInstantiator(
+                                this, field("withMultipleConstructor"), resolver)
+                        .instantiate();
 
         assertNotNull(withMultipleConstructor);
         assertNotNull(withMultipleConstructor.observer);
@@ -123,8 +127,10 @@ public class ParameterizedConstructorInstantiatorTest {
         given(resolver.resolveTypeInstances(ArgumentMatchers.any(Class[].class)))
                 .willReturn(new Object[] {"", vararg});
 
-        new ParameterizedConstructorInstantiator(this, field("withVarargConstructor"), resolver)
-                .instantiate();
+        FieldInitializationReport ignored =
+                new ParameterizedConstructorInstantiator(
+                                this, field("withVarargConstructor"), resolver)
+                        .instantiate();
 
         assertNotNull(withVarargConstructor);
     }

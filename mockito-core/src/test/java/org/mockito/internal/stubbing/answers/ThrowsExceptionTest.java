@@ -23,8 +23,9 @@ public class ThrowsExceptionTest {
     @Test
     public void should_raise_wanted_throwable() {
         try {
-            new ThrowsException(new IllegalStateException("my dear throwable"))
-                    .answer(createMethodInvocation());
+            Object unused =
+                    new ThrowsException(new IllegalStateException("my dear throwable"))
+                            .answer(createMethodInvocation());
             Assertions.fail("should have raised wanted exception");
         } catch (Throwable throwable) {
             assertThat(throwable)
@@ -36,7 +37,8 @@ public class ThrowsExceptionTest {
     @Test
     public void should_throw_mock_exception_without_stacktrace() {
         try {
-            new ThrowsException(mock(Exception.class)).answer(createMethodInvocation());
+            Object unused =
+                    new ThrowsException(mock(Exception.class)).answer(createMethodInvocation());
             Assertions.fail("should have raised wanted exception");
         } catch (Throwable throwable) {
             assertThat(throwable.getStackTrace()).describedAs("no stack trace, it's mock").isNull();
@@ -55,7 +57,7 @@ public class ThrowsExceptionTest {
         try {
 
             // when
-            new ThrowsException(throwableToRaise).answer(createMethodInvocation());
+            Object unused = new ThrowsException(throwableToRaise).answer(createMethodInvocation());
             Assertions.fail("should have raised wanted exception");
         } catch (Throwable throwable) {
             // then

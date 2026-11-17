@@ -4,6 +4,8 @@
  */
 package org.mockito.internal.configuration.plugins;
 
+import org.mockito.CanIgnoreReturnValue;
+
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -29,6 +31,7 @@ class PluginInitializer {
      * Equivalent to {@link java.util.ServiceLoader#load} but without requiring
      * Java 6 / Android 2.3 (Gingerbread).
      */
+    @CanIgnoreReturnValue
     public <T> T loadImpl(Class<T> service) {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         if (loader == null) {

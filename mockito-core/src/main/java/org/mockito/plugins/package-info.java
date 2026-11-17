@@ -34,4 +34,5 @@
  * Mockito will only use the first returned by the standard <code>ClassLoader.getResource</code> mechanism.
  * </p>
  */
+@org.mockito.CheckReturnValue
 package org.mockito.plugins;

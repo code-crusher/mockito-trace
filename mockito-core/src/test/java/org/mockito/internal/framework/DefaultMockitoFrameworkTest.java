@@ -37,6 +37,7 @@ import org.mockito.internal.configuration.plugins.Plugins;
 import org.mockito.listeners.MockCreationListener;
 import org.mockito.listeners.MockitoListener;
 import org.mockito.mock.MockCreationSettings;
+import org.mockito.CanIgnoreReturnValue;
 import org.mockito.plugins.InlineMockMaker;
 import org.mockitoutil.TestBase;
 
@@ -52,6 +53,7 @@ class PersonWithName {
     }
 }
 
+@CanIgnoreReturnValue
 class HasStatic {
     public static String staticName() {
         return "static name";
@@ -186,7 +188,7 @@ public class DefaultMockitoFrameworkTest extends TestBase {
         framework.clearInlineMocks();
 
         try {
-            obj.getMyName();
+            String unused = obj.getMyName();
         } catch (DisabledMockException e) {
             return;
         }
@@ -223,7 +225,7 @@ public class DefaultMockitoFrameworkTest extends TestBase {
         framework.clearInlineMocks();
 
         try {
-            mockingDetails(obj).isMock();
+            boolean unused = mockingDetails(obj).isMock();
         } catch (DisabledMockException e) {
             return;
         }

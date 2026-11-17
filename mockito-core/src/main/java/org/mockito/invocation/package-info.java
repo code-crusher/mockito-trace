@@ -6,4 +6,5 @@
 /**
  * Public API related to mock method invocations.
  */
+@org.mockito.CheckReturnValue
 package org.mockito.invocation;

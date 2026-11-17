@@ -19,7 +19,12 @@ public class ReturnsDeepStubsConcurrentTest {
             given_mock_with_returns_deep_stubs__when_called_concurrently__then_does_not_throw_concurrent_modification_exception() {
         for (int i = 0; i < 1000; i++) {
             Service mock = mock(Service.class, Answers.RETURNS_DEEP_STUBS);
-            IntStream.range(1, 100).parallel().forEach(index -> mock.doSomething());
+            IntStream.range(1, 100)
+                    .parallel()
+                    .forEach(
+                            index -> {
+                                List<String> unused = mock.doSomething();
+                            });
         }
     }
 

@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.mockito.CanIgnoreReturnValue;
 import org.mockito.listeners.InvocationListener;
 import org.mockito.listeners.StubbingLookupListener;
 import org.mockito.listeners.VerificationStartedListener;
@@ -83,11 +84,13 @@ public class CreationSettings<T> implements MockCreationSettings<T>, Serializabl
         return typeToMock;
     }
 
+    @CanIgnoreReturnValue
     public CreationSettings<T> setTypeToMock(Class<T> typeToMock) {
         this.typeToMock = typeToMock;
         return this;
     }
 
+    @CanIgnoreReturnValue
     public CreationSettings<T> setGenericTypeToMock(Type genericTypeToMock) {
         this.genericTypeToMock = genericTypeToMock;
         return this;
@@ -98,6 +101,7 @@ public class CreationSettings<T> implements MockCreationSettings<T>, Serializabl
         return extraInterfaces;
     }
 
+    @CanIgnoreReturnValue
     public CreationSettings<T> setExtraInterfaces(Set<Class<?>> extraInterfaces) {
         this.extraInterfaces = extraInterfaces;
         return this;
@@ -122,6 +126,7 @@ public class CreationSettings<T> implements MockCreationSettings<T>, Serializabl
         return mockName;
     }
 
+    @CanIgnoreReturnValue
     public CreationSettings<T> setMockName(MockName mockName) {
         this.mockName = mockName;
         return this;
@@ -132,6 +137,7 @@ public class CreationSettings<T> implements MockCreationSettings<T>, Serializabl
         return serializableMode != SerializableMode.NONE;
     }
 
+    @CanIgnoreReturnValue
     public CreationSettings<T> setSerializableMode(SerializableMode serializableMode) {
         this.serializableMode = serializableMode;
         return this;

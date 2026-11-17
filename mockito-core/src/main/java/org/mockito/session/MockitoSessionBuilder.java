@@ -4,6 +4,7 @@
  */
 package org.mockito.session;
 
+import org.mockito.CanIgnoreReturnValue;
 import org.mockito.MockitoAnnotations;
 import org.mockito.MockitoSession;
 import org.mockito.NotExtensible;
@@ -39,6 +40,7 @@ public interface MockitoSessionBuilder {
      * @return the same builder instance for fluent configuration of {@code MockitoSession}.
      * @since 2.7.0
      */
+    @CanIgnoreReturnValue
     MockitoSessionBuilder initMocks(Object testClassInstance);
 
     /**
@@ -56,6 +58,7 @@ public interface MockitoSessionBuilder {
      * @see #initMocks(Object)
      * @since 2.15.0
      */
+    @CanIgnoreReturnValue
     MockitoSessionBuilder initMocks(Object... testClassInstances);
 
     /**
@@ -77,6 +80,7 @@ public interface MockitoSessionBuilder {
      * @see org.mockito.quality.MockitoHint
      * @since 2.15.0
      */
+    @CanIgnoreReturnValue
     MockitoSessionBuilder name(String name);
 
     /**
@@ -90,6 +94,7 @@ public interface MockitoSessionBuilder {
      * @return the same builder instance for fluent configuration of {@code MockitoSession}.
      * @since 2.7.0
      */
+    @CanIgnoreReturnValue
     MockitoSessionBuilder strictness(Strictness strictness);
 
     /**
@@ -108,6 +113,7 @@ public interface MockitoSessionBuilder {
      * @see org.mockito.quality.MockitoHint
      * @since 2.15.0
      */
+    @CanIgnoreReturnValue
     MockitoSessionBuilder logger(MockitoSessionLogger logger);
 
     /**

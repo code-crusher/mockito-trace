@@ -6,4 +6,5 @@
 /**
  * Verification errors.
  */
+@org.mockito.CheckReturnValue
 package org.mockito.exceptions.verification;

@@ -4,6 +4,8 @@
  */
 package org.mockito.internal.util.concurrent;
 
+import org.mockito.CanIgnoreReturnValue;
+
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
@@ -86,6 +88,7 @@ public class WeakConcurrentMap<K, V> extends ReferenceQueue<K>
      * @param value The value of the entry.
      * @return The previous entry or {@code null} if it does not exist.
      */
+    @CanIgnoreReturnValue
     public V put(K key, V value) {
         if (key == null || value == null) {
             throw new NullPointerException();
@@ -98,6 +101,7 @@ public class WeakConcurrentMap<K, V> extends ReferenceQueue<K>
      * @return The removed entry or {@code null} if it does not exist.
      */
     @SuppressWarnings("CollectionIncompatibleType")
+    @CanIgnoreReturnValue
     public V remove(K key) {
         if (key == null) {
             throw new NullPointerException();
@@ -274,12 +278,14 @@ public class WeakConcurrentMap<K, V> extends ReferenceQueue<K>
         }
 
         @Override
+        @CanIgnoreReturnValue
         public V put(K key, V value) {
             expungeStaleEntries();
             return super.put(key, value);
         }
 
         @Override
+        @CanIgnoreReturnValue
         public V remove(K key) {
             expungeStaleEntries();
             return super.remove(key);

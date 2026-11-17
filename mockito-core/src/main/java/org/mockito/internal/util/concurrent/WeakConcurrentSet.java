@@ -4,6 +4,8 @@
  */
 package org.mockito.internal.util.concurrent;
 
+import org.mockito.CanIgnoreReturnValue;
+
 import java.util.Iterator;
 import java.util.Map;
 
@@ -36,6 +38,7 @@ public class WeakConcurrentSet<V> implements Runnable, Iterable<V> {
      * @param value The value to add to the set.
      * @return {@code true} if the value was added to the set and was not contained before.
      */
+    @CanIgnoreReturnValue
     public boolean add(V value) {
         return target.put(value, Boolean.TRUE) == null; // is null or Boolean.TRUE
     }
@@ -52,6 +55,7 @@ public class WeakConcurrentSet<V> implements Runnable, Iterable<V> {
      * @param value The value to remove from the set.
      * @return {@code true} if the value is contained in the set.
      */
+    @CanIgnoreReturnValue
     public boolean remove(V value) {
         return target.remove(value) != null;
     }

@@ -4,6 +4,8 @@
  */
 package org.mockito.internal.creation;
 
+import org.mockito.CanIgnoreReturnValue;
+
 import static java.util.Arrays.asList;
 
 import static org.mockito.internal.exceptions.Reporter.defaultAnswerDoesNotAcceptNullParameter;
@@ -49,17 +51,20 @@ public class MockSettingsImpl<T> extends CreationSettings<T>
     private Object[] constructorArgs;
 
     @Override
+    @CanIgnoreReturnValue
     public MockSettings serializable() {
         return serializable(SerializableMode.BASIC);
     }
 
     @Override
+    @CanIgnoreReturnValue
     public MockSettings serializable(SerializableMode mode) {
         this.serializableMode = mode;
         return this;
     }
 
     @Override
+    @CanIgnoreReturnValue
     public MockSettings extraInterfaces(Class<?>... extraInterfaces) {
         if (extraInterfaces == null || extraInterfaces.length == 0) {
             throw extraInterfacesRequiresAtLeastOneInterface();
@@ -92,18 +97,21 @@ public class MockSettingsImpl<T> extends CreationSettings<T>
     }
 
     @Override
+    @CanIgnoreReturnValue
     public MockSettings name(String name) {
         this.name = name;
         return this;
     }
 
     @Override
+    @CanIgnoreReturnValue
     public MockSettings spiedInstance(Object spiedInstance) {
         this.spiedInstance = spiedInstance;
         return this;
     }
 
     @Override
+    @CanIgnoreReturnValue
     public MockSettings defaultAnswer(Answer defaultAnswer) {
         this.defaultAnswer = defaultAnswer;
         if (defaultAnswer == null) {
@@ -118,12 +126,14 @@ public class MockSettingsImpl<T> extends CreationSettings<T>
     }
 
     @Override
+    @CanIgnoreReturnValue
     public MockSettingsImpl<T> stubOnly() {
         this.stubOnly = true;
         return this;
     }
 
     @Override
+    @CanIgnoreReturnValue
     public MockSettings useConstructor(Object... constructorArgs) {
         Checks.checkNotNull(
                 constructorArgs,
@@ -135,12 +145,14 @@ public class MockSettingsImpl<T> extends CreationSettings<T>
     }
 
     @Override
+    @CanIgnoreReturnValue
     public MockSettings outerInstance(Object outerClassInstance) {
         this.outerClassInstance = outerClassInstance;
         return this;
     }
 
     @Override
+    @CanIgnoreReturnValue
     public MockSettings withoutAnnotations() {
         stripAnnotations = true;
         return this;
@@ -173,6 +185,7 @@ public class MockSettingsImpl<T> extends CreationSettings<T>
     }
 
     @Override
+    @CanIgnoreReturnValue
     public MockSettings verboseLogging() {
         if (!invocationListenersContainsType(VerboseMockInvocationLogger.class)) {
             invocationListeners(new VerboseMockInvocationLogger());
@@ -181,12 +194,14 @@ public class MockSettingsImpl<T> extends CreationSettings<T>
     }
 
     @Override
+    @CanIgnoreReturnValue
     public MockSettings invocationListeners(InvocationListener... listeners) {
         addListeners(listeners, invocationListeners, "invocationListeners");
         return this;
     }
 
     @Override
+    @CanIgnoreReturnValue
     public MockSettings stubbingLookupListeners(StubbingLookupListener... listeners) {
         addListeners(listeners, stubbingLookupListeners, "stubbingLookupListeners");
         return this;
@@ -208,6 +223,7 @@ public class MockSettingsImpl<T> extends CreationSettings<T>
     }
 
     @Override
+    @CanIgnoreReturnValue
     public MockSettings verificationStartedListeners(VerificationStartedListener... listeners) {
         addListeners(listeners, this.verificationStartedListeners, "verificationStartedListeners");
         return this;
@@ -242,12 +258,14 @@ public class MockSettingsImpl<T> extends CreationSettings<T>
     }
 
     @Override
+    @CanIgnoreReturnValue
     public MockSettings lenient() {
         this.strictness = Strictness.LENIENT;
         return this;
     }
 
     @Override
+    @CanIgnoreReturnValue
     public MockSettings strictness(Strictness strictness) {
         if (strictness == null) {
             throw strictnessDoesNotAcceptNullParameter();
@@ -257,12 +275,14 @@ public class MockSettingsImpl<T> extends CreationSettings<T>
     }
 
     @Override
+    @CanIgnoreReturnValue
     public MockSettings mockMaker(String mockMaker) {
         this.mockMaker = mockMaker;
         return this;
     }
 
     @Override
+    @CanIgnoreReturnValue
     public MockSettings genericTypeToMock(Type genericType) {
         this.genericTypeToMock = genericType;
         return this;

@@ -4,6 +4,7 @@
  */
 package org.mockito;
 
+import org.mockito.CanIgnoreReturnValue;
 import org.mockito.exceptions.misusing.DisabledMockException;
 import org.mockito.exceptions.misusing.RedundantListenerException;
 import org.mockito.invocation.Invocation;
@@ -53,6 +54,7 @@ public interface MockitoFramework {
      * @return this instance of mockito framework (fluent builder pattern)
      * @since 2.1.0
      */
+    @CanIgnoreReturnValue
     MockitoFramework addListener(MockitoListener listener) throws RedundantListenerException;
 
     /**
@@ -69,6 +71,7 @@ public interface MockitoFramework {
      * @return this instance of mockito framework (fluent builder pattern)
      * @since 2.1.0
      */
+    @CanIgnoreReturnValue
     MockitoFramework removeListener(MockitoListener listener);
 
     /**

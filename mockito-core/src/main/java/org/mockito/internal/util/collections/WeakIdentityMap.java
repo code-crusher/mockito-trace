@@ -4,6 +4,8 @@
  */
 package org.mockito.internal.util.collections;
 
+import org.mockito.CanIgnoreReturnValue;
+
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.*;
@@ -69,6 +71,7 @@ public class WeakIdentityMap<V> extends AbstractMap<Object, V> {
     }
 
     @Override
+    @CanIgnoreReturnValue
     public V put(Object key, V value) {
         expungeStaleEntries();
         int hash = System.identityHashCode(key);
@@ -91,6 +94,7 @@ public class WeakIdentityMap<V> extends AbstractMap<Object, V> {
     }
 
     @Override
+    @CanIgnoreReturnValue
     public V remove(Object key) {
         expungeStaleEntries();
         int hash = System.identityHashCode(key);

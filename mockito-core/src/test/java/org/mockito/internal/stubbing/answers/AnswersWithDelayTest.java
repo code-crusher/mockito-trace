@@ -60,7 +60,9 @@ public class AnswersWithDelayTest {
         final AnswersWithDelay testSubject = new AnswersWithDelay(sleepyTime, new Returns("value"));
 
         final Date before = new Date();
-        testSubject.answer(new InvocationBuilder().method("oneArg").arg("A").toInvocation());
+        Object unused =
+                testSubject.answer(
+                        new InvocationBuilder().method("oneArg").arg("A").toInvocation());
         final Date after = new Date();
 
         final long timePassed = after.getTime() - before.getTime();

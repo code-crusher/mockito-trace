@@ -16,6 +16,7 @@ import org.mockito.exceptions.base.MockitoException;
 import org.mockito.internal.creation.MockSettingsImpl;
 import org.mockito.internal.invocation.InvocationBuilder;
 import org.mockito.internal.invocation.InvocationMatcher;
+import org.mockito.internal.stubbing.StubbedInvocationMatcher;
 import org.mockito.internal.stubbing.answers.Returns;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsEmptyValues;
 import org.mockito.invocation.Invocation;
@@ -58,7 +59,7 @@ public class InvocationContainerImplTest {
                             }
                             c.setInvocationForPotentialStubbing(new InvocationMatcher(invocation));
                             c.addAnswer(new Returns("foo"), null);
-                            c.findAnswerFor(invocation);
+                            StubbedInvocationMatcher ignored = c.findAnswerFor(invocation);
                         }
                     };
             t[i].setUncaughtExceptionHandler(

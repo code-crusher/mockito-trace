@@ -4,6 +4,8 @@
  */
 package org.mockito.internal.verification;
 
+import org.mockito.CanIgnoreReturnValue;
+
 import org.mockito.verification.VerificationMode;
 
 public final class VerificationModeFactory {
@@ -12,6 +14,7 @@ public final class VerificationModeFactory {
         return atLeast(1);
     }
 
+    @CanIgnoreReturnValue
     public static VerificationMode atLeast(int minNumberOfInvocations) {
         return new AtLeast(minNumberOfInvocations);
     }

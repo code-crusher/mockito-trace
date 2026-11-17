@@ -4,6 +4,8 @@
  */
 package org.mockito.internal.util.collections;
 
+import org.mockito.CanIgnoreReturnValue;
+
 import static java.lang.reflect.Array.*;
 
 import java.util.Arrays;
@@ -70,11 +72,13 @@ public class HashCodeAndEqualsSafeSet implements Set<Object> {
     }
 
     @Override
+    @CanIgnoreReturnValue
     public boolean add(Object mock) {
         return backingHashSet.add(HashCodeAndEqualsMockWrapper.of(mock));
     }
 
     @Override
+    @CanIgnoreReturnValue
     public boolean remove(Object mock) {
         return backingHashSet.remove(HashCodeAndEqualsMockWrapper.of(mock));
     }
@@ -137,6 +141,7 @@ public class HashCodeAndEqualsSafeSet implements Set<Object> {
     }
 
     @Override
+    @CanIgnoreReturnValue
     public boolean addAll(Collection<?> mocks) {
         return backingHashSet.addAll(asWrappedMocks(mocks));
     }
