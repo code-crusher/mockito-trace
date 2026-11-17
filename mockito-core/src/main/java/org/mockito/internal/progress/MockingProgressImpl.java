@@ -8,6 +8,8 @@ import static org.mockito.internal.exceptions.Reporter.unfinishedStubbing;
 import static org.mockito.internal.exceptions.Reporter.unfinishedVerificationException;
 import static org.mockito.internal.progress.StubbingStyle.ANSWER_FIRST;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,6 +20,7 @@ import org.mockito.internal.debugging.Localized;
 import org.mockito.internal.debugging.LocationFactory;
 import org.mockito.internal.exceptions.Reporter;
 import org.mockito.internal.listeners.AutoCleanableListener;
+import org.mockito.internal.verification.MockAwareVerificationMode;
 import org.mockito.invocation.Location;
 import org.mockito.listeners.MockCreationListener;
 import org.mockito.listeners.MockitoListener;
@@ -33,7 +36,22 @@ public class MockingProgressImpl implements MockingProgress {
     private final ArgumentMatcherStorage argumentMatcherStorage = new ArgumentMatcherStorageImpl();
 
     private OngoingStubbing<?> ongoingStubbing;
-    private Localized<VerificationMode> verificationMode;
+
+    /**
+     * Pending verifications, most recent first. A single slot would be enough for ordinary usage,
+     * but a verification started by {@code InOrder.verify(mock)} is completed by the invocation the
+     * caller chains onto the returned mock, which may only happen after further verifications ran
+     * in between. See {@link MockAwareVerificationMode#isDeferred()}.
+     */
+    private final Deque<Localized<VerificationMode>> verificationModes = new ArrayDeque<>();
+
+    /**
+     * Verifications that were triggered while a deferred verification was still pending. They are
+     * replayed once that deferred verification is completed, so that they observe the same order in
+     * which the verified interactions really happened.
+     */
+    private final Deque<Runnable> postponedVerifications = new ArrayDeque<>();
+
     private Location stubbingInProgress = null;
     private boolean awaitingStubbingTarget;
     private VerificationStrategy verificationStrategy;
@@ -79,9 +97,9 @@ public class MockingProgressImpl implements MockingProgress {
 
     @Override
     public void verificationStarted(VerificationMode verify) {
-        validateState();
+        validateStateAllowingDeferredVerification();
         resetOngoingStubbing();
-        verificationMode = new Localized(verify);
+        verificationModes.push(new Localized(verify));
     }
 
     /**
@@ -95,13 +113,8 @@ public class MockingProgressImpl implements MockingProgress {
 
     @Override
     public VerificationMode pullVerificationMode() {
-        if (verificationMode == null) {
-            return null;
-        }
-
-        VerificationMode temp = verificationMode.getObject();
-        verificationMode = null;
-        return temp;
+        Localized<VerificationMode> pending = verificationModes.poll();
+        return pending == null ? null : pending.getObject();
     }
 
     @Override
@@ -113,7 +126,16 @@ public class MockingProgressImpl implements MockingProgress {
 
     @Override
     public void validateState() {
-        validateMostStuff();
+        validateState(false);
+    }
+
+    @Override
+    public void validateStateAllowingDeferredVerification() {
+        validateState(true);
+    }
+
+    private void validateState(boolean allowDeferredVerification) {
+        validateMostStuff(allowDeferredVerification);
 
         // validate stubbing:
         if (stubbingInProgress != null) {
@@ -124,19 +146,74 @@ public class MockingProgressImpl implements MockingProgress {
         }
     }
 
-    private void validateMostStuff() {
+    private void validateMostStuff(boolean allowDeferredVerification) {
         // State is cool when GlobalConfiguration is already loaded
         // this cannot really be tested functionally because I cannot dynamically mess up
         // org.mockito.configuration.MockitoConfiguration class
         GlobalConfiguration.validate();
 
-        if (verificationMode != null) {
-            Location location = verificationMode.getLocation();
-            verificationMode = null;
-            throw unfinishedVerificationException(location);
+        Localized<VerificationMode> unfinished =
+                findUnfinishedVerification(allowDeferredVerification);
+        if (unfinished != null) {
+            verificationModes.clear();
+            postponedVerifications.clear();
+            throw unfinishedVerificationException(unfinished.getLocation());
         }
 
         getArgumentMatcherStorage().validateState();
+    }
+
+    /**
+     * Returns the pending verification that makes the current state invalid, if any. Pending
+     * verifications are iterated from the most recent one.
+     */
+    private Localized<VerificationMode> findUnfinishedVerification(
+            boolean allowDeferredVerification) {
+        for (Localized<VerificationMode> pending : verificationModes) {
+            if (!allowDeferredVerification || !isDeferred(pending)) {
+                return pending;
+            }
+        }
+        return null;
+    }
+
+    private static boolean isDeferred(Localized<VerificationMode> pending) {
+        VerificationMode mode = pending.getObject();
+        return mode instanceof MockAwareVerificationMode
+                && ((MockAwareVerificationMode) mode).isDeferred();
+    }
+
+    @Override
+    public boolean hasDeferredVerification() {
+        for (Localized<VerificationMode> pending : verificationModes) {
+            if (isDeferred(pending)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void postponeVerification(Runnable verification) {
+        postponedVerifications.add(verification);
+    }
+
+    @Override
+    public void runPostponedVerifications() {
+        try {
+            while (!postponedVerifications.isEmpty()) {
+                postponedVerifications.poll().run();
+            }
+        } catch (RuntimeException | Error e) {
+            // Do not leak remaining verifications into unrelated later invocations.
+            postponedVerifications.clear();
+            throw e;
+        }
+    }
+
+    @Override
+    public void clearPostponedVerifications() {
+        postponedVerifications.clear();
     }
 
     @Override
@@ -181,7 +258,7 @@ public class MockingProgressImpl implements MockingProgress {
         return "ongoingStubbing: "
                 + ongoingStubbing
                 + ", verificationMode: "
-                + verificationMode
+                + (verificationModes.isEmpty() ? null : verificationModes.peek())
                 + ", stubbingInProgress: "
                 + stubbingInProgress;
     }
@@ -190,7 +267,8 @@ public class MockingProgressImpl implements MockingProgress {
     public void reset() {
         stubbingInProgress = null;
         awaitingStubbingTarget = false;
-        verificationMode = null;
+        verificationModes.clear();
+        postponedVerifications.clear();
         getArgumentMatcherStorage().reset();
     }
 
@@ -206,7 +284,7 @@ public class MockingProgressImpl implements MockingProgress {
                 ((MockCreationListener) listener).onMockCreated(mock, settings);
             }
         }
-        validateMostStuff();
+        validateMostStuff(false);
     }
 
     @Override
@@ -216,7 +294,7 @@ public class MockingProgressImpl implements MockingProgress {
                 ((MockCreationListener) listener).onStaticMockCreated(mock, settings);
             }
         }
-        validateMostStuff();
+        validateMostStuff(false);
     }
 
     @Override
@@ -226,7 +304,7 @@ public class MockingProgressImpl implements MockingProgress {
                 ((MockCreationListener) listener).onSingletonMockCreated(mock, settings);
             }
         }
-        validateMostStuff();
+        validateMostStuff(false);
     }
 
     @Override

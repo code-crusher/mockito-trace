@@ -33,6 +33,34 @@ public interface MockingProgress {
 
     void validateState();
 
+    /**
+     * Like {@link #validateState()}, but tolerates a pending verification started by
+     * {@code InOrder.verify(mock)} that the caller has not completed yet. Such a verification is
+     * completed by the invocation chained onto the returned mock, which may only happen after
+     * other verifications have run.
+     */
+    void validateStateAllowingDeferredVerification();
+
+    /**
+     * Whether a verification started by {@code InOrder.verify(mock)} is still waiting for the
+     * caller's invocation to complete it.
+     */
+    boolean hasDeferredVerification();
+
+    /**
+     * Defers a verification until the pending deferred verification is completed.
+     *
+     * <p>In-order verification is strictly sequential: verifying an invocation that happened
+     * before the one being deferred would fail. Postponing keeps the original ordering.
+     */
+    void postponeVerification(Runnable verification);
+
+    /** Runs all verifications deferred via {@link #postponeVerification(Runnable)}. */
+    void runPostponedVerifications();
+
+    /** Discards verifications deferred via {@link #postponeVerification(Runnable)}. */
+    void clearPostponedVerifications();
+
     boolean isAwaitingStubbingTarget();
 
     /** Ends target selection while leaving the stubbing unfinished until the method is supplied. */

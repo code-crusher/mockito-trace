@@ -152,6 +152,19 @@ public class MockitoCore {
     }
 
     public <T> T verify(T mock, VerificationMode mode) {
+        return verify(mock, mode, false);
+    }
+
+    /**
+     * Starts a verification that the caller completes by invoking a method on the returned mock,
+     * where that invocation may only arrive after other verifications have run. Used by
+     * {@code InOrder.verify(mock)}, so that a helper method can return the mock to its caller.
+     */
+    public <T> T verifyInOrder(T mock, VerificationMode mode) {
+        return verify(mock, mode, true);
+    }
+
+    private <T> T verify(T mock, VerificationMode mode, boolean deferred) {
         if (mock == null) {
             throw nullPassedToVerify();
         }
@@ -171,7 +184,7 @@ public class MockitoCore {
         VerificationMode actualMode = mockingProgress.maybeVerifyLazily(mode);
         mockingProgress.verificationStarted(
                 new MockAwareVerificationMode(
-                        mock, actualMode, mockingProgress.verificationListeners()));
+                        mock, actualMode, mockingProgress.verificationListeners(), deferred));
         return mock;
     }
 

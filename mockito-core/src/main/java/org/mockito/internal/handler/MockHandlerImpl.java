@@ -75,7 +75,7 @@ public class MockHandlerImpl<T> implements MockHandler<T> {
             InvocationMatcher invocationMatcher =
                     matchersBinder.bindMatchers(
                             mockingProgress().getArgumentMatcherStorage(), invocation);
-            mockingProgress().validateState();
+            mockingProgress().validateStateAllowingDeferredVerification();
 
             // if verificationMode is not null then someone is doing verify()
             if (verificationMode != null) {
@@ -86,7 +86,25 @@ public class MockHandlerImpl<T> implements MockHandler<T> {
                         invocation.getMock())) {
                     VerificationDataImpl data =
                             new VerificationDataImpl(invocationContainer, invocationMatcher);
-                    verificationMode.verify(data);
+                    if (isDeferred(verificationMode)
+                            && mockingProgress().hasDeferredVerification()) {
+                        // An earlier in-order verification is still waiting for the invocation its
+                        // caller chains onto the mock. In-order verification is sequential, so
+                        // running this one now would observe the wrong order. See issue #3449.
+                        mockingProgress().postponeVerification(() -> verificationMode.verify(data));
+                        return null;
+                    }
+                    if (isDeferred(verificationMode)) {
+                        try {
+                            verificationMode.verify(data);
+                        } catch (RuntimeException | Error e) {
+                            mockingProgress().clearPostponedVerifications();
+                            throw e;
+                        }
+                        mockingProgress().runPostponedVerifications();
+                    } else {
+                        verificationMode.verify(data);
+                    }
                     return null;
                 } else {
                     // this means there is an invocation on a different mock. Re-adding verification
@@ -150,6 +168,11 @@ public class MockHandlerImpl<T> implements MockHandler<T> {
                 mockingProgress().resumeStubbingInProgress(suspendedStubbing);
             }
         }
+    }
+
+    private static boolean isDeferred(VerificationMode verificationMode) {
+        return verificationMode instanceof MockAwareVerificationMode
+                && ((MockAwareVerificationMode) verificationMode).isDeferred();
     }
 
     private static boolean isDeepStubsAnswer(Answer<?> answer) {

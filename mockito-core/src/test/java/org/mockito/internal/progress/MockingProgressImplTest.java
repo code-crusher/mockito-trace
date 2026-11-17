@@ -5,6 +5,7 @@
 package org.mockito.internal.progress;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
@@ -24,9 +25,12 @@ import org.junit.Test;
 import org.mockito.exceptions.base.MockitoException;
 import org.mockito.exceptions.misusing.RedundantListenerException;
 import org.mockito.exceptions.misusing.UnfinishedStubbingException;
+import org.mockito.exceptions.misusing.UnfinishedVerificationException;
 import org.mockito.internal.listeners.AutoCleanableListener;
+import org.mockito.internal.verification.MockAwareVerificationMode;
 import org.mockito.internal.verification.VerificationModeFactory;
 import org.mockito.listeners.MockitoListener;
+import org.mockito.listeners.VerificationListener;
 import org.mockito.verification.VerificationMode;
 import org.mockitoutil.TestBase;
 
@@ -95,6 +99,67 @@ public class MockingProgressImplTest extends TestBase {
             fail();
         } catch (MockitoException e) {
         }
+    }
+
+    @Test
+    public void should_allow_deferred_verification_to_stay_pending() {
+        // given a deferred verification started by InOrder.verify(mock)
+        mockingProgress.verificationStarted(
+                new MockAwareVerificationMode(
+                        new Object(),
+                        VerificationModeFactory.times(1),
+                        new LinkedHashSet<VerificationListener>(),
+                        true));
+
+        // when another verification starts, as a finally block in the wrapper method would
+        mockingProgress.verificationStarted(VerificationModeFactory.atLeastOnce());
+
+        // then neither is reported as unfinished
+        assertTrue(mockingProgress.hasDeferredVerification());
+        assertNotNull(mockingProgress.pullVerificationMode());
+        assertNotNull(mockingProgress.pullVerificationMode());
+    }
+
+    @Test
+    public void should_report_deferred_verification_as_unfinished_on_explicit_validation() {
+        // given a deferred verification that the caller never completed
+        mockingProgress.verificationStarted(
+                new MockAwareVerificationMode(
+                        new Object(),
+                        VerificationModeFactory.times(1),
+                        new LinkedHashSet<VerificationListener>(),
+                        true));
+
+        // then explicit validation still reports the misuse
+        assertThrows(UnfinishedVerificationException.class, mockingProgress::validateState);
+    }
+
+    @Test
+    public void should_report_non_deferred_verification_as_unfinished_when_another_starts() {
+        // given an ordinary verification that was never completed
+        mockingProgress.verificationStarted(VerificationModeFactory.times(1));
+
+        // then starting another one is still detected as misuse
+        assertThrows(
+                UnfinishedVerificationException.class,
+                () -> mockingProgress.verificationStarted(VerificationModeFactory.atLeastOnce()));
+    }
+
+    @Test
+    public void should_replay_postponed_verifications_in_order() {
+        // given
+        final StringBuilder order = new StringBuilder();
+        mockingProgress.postponeVerification(() -> order.append("first"));
+        mockingProgress.postponeVerification(() -> order.append(",second"));
+
+        // when
+        mockingProgress.runPostponedVerifications();
+
+        // then
+        Assertions.assertThat(order.toString()).isEqualTo("first,second");
+        // and the queue is drained
+        mockingProgress.runPostponedVerifications();
+        Assertions.assertThat(order.toString()).isEqualTo("first,second");
     }
 
     @Test

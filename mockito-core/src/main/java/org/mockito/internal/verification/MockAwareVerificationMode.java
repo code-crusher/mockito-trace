@@ -16,12 +16,30 @@ public class MockAwareVerificationMode implements VerificationMode {
     private final Object mock;
     private final VerificationMode mode;
     private final Set<VerificationListener> listeners;
+    private final boolean deferred;
 
     public MockAwareVerificationMode(
             Object mock, VerificationMode mode, Set<VerificationListener> listeners) {
+        this(mock, mode, listeners, false);
+    }
+
+    public MockAwareVerificationMode(
+            Object mock,
+            VerificationMode mode,
+            Set<VerificationListener> listeners,
+            boolean deferred) {
         this.mock = mock;
         this.mode = mode;
         this.listeners = listeners;
+        this.deferred = deferred;
+    }
+
+    /**
+     * A deferred verification was started by {@code InOrder.verify(mock)} and is completed by the
+     * caller's chained invocation, possibly after other verifications have run in between.
+     */
+    public boolean isDeferred() {
+        return deferred;
     }
 
     @Override
