@@ -9,6 +9,9 @@ dependencies {
     implementation(project(":mockito-core"))
     testImplementation(libs.junit4)
     testImplementation(libs.assertj)
+    // JNA enables Byte Buddy's emulated attach used by AttachPidCleanupTest. It is optional at
+    // runtime (Mockito users do not need it); the test skips itself when it is unavailable.
+    testImplementation(libs.jna)
 }
 val premainClinitSuppressionTest by tasks.registering(Test::class) {
     description = "Runs PremainClinitSuppressionTest with -javaagent and clinit suppression"
