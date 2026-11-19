@@ -27,6 +27,18 @@ public interface MockedStatic<T> extends ScopedMock {
 
     /**
      * See {@link Mockito#when(Object)}.
+     * <p>
+     * Generic static methods can be stubbed like any other static method. Their type parameters are
+     * erased at runtime, exactly like for regular mocks, so an {@link org.mockito.stubbing.Answer}
+     * cannot declare them. The type argument is however available from the invocation whenever the
+     * stubbed method receives it, for example as a {@link Class} token, so an answer can forward it
+     * to another generic method:
+     * <pre class="code"><code class="java">
+     * try (MockedStatic&lt;Bar&gt; mockedBar = mockStatic(Bar.class)) {
+     *     mockedBar.when(() -&gt; Bar.foo(any())).thenAnswer(
+     *         invocation -&gt; otherGenericMethod(invocation.getArgument(0)));
+     * }
+     * </code></pre>
      */
     <S> OngoingStubbing<S> when(Verification verification);
 
