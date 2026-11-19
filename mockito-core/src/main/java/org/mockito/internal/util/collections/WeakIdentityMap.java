@@ -8,6 +8,8 @@ import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.*;
 
+import org.mockito.CanIgnoreReturnValue;
+
 /**
  * A weak-key map that uses identity ({@code ==}) rather than {@code hashCode()}/{@code equals()}
  * for key comparison. This avoids calling instrumented methods on mock instances during map
@@ -69,6 +71,7 @@ public class WeakIdentityMap<V> extends AbstractMap<Object, V> {
     }
 
     @Override
+    @CanIgnoreReturnValue
     public V put(Object key, V value) {
         expungeStaleEntries();
         int hash = System.identityHashCode(key);
@@ -91,6 +94,7 @@ public class WeakIdentityMap<V> extends AbstractMap<Object, V> {
     }
 
     @Override
+    @CanIgnoreReturnValue
     public V remove(Object key) {
         expungeStaleEntries();
         int hash = System.identityHashCode(key);

@@ -806,7 +806,7 @@ public class ArgumentMatchers {
      * @return <code>null</code>.
      */
     public static <T> T nullable(Class<T> clazz) {
-        AdditionalMatchers.or(isNull(), isA(clazz));
+        Object ignored = AdditionalMatchers.or(isNull(), isA(clazz));
         return Primitives.defaultValue(clazz);
     }
 

@@ -91,18 +91,21 @@ public class BDDMockito extends Mockito {
          * See original {@link OngoingStubbing#thenAnswer(Answer)}
          * @since 1.8.0
          */
+        @CanIgnoreReturnValue
         BDDMyOngoingStubbing<T> willAnswer(Answer<?> answer);
 
         /**
          * See original {@link OngoingStubbing#then(Answer)}
          * @since 1.9.0
          */
+        @CanIgnoreReturnValue
         BDDMyOngoingStubbing<T> will(Answer<?> answer);
 
         /**
          * See original {@link OngoingStubbing#thenReturn(Object)}
          * @since 1.8.0
          */
+        @CanIgnoreReturnValue
         BDDMyOngoingStubbing<T> willReturn(@Nullable T value);
 
         /**
@@ -110,18 +113,21 @@ public class BDDMockito extends Mockito {
          * @since 1.8.0
          */
         @SuppressWarnings({"unchecked", "varargs"})
+        @CanIgnoreReturnValue
         BDDMyOngoingStubbing<T> willReturn(@Nullable T value, @Nullable T... values);
 
         /**
          * See original {@link OngoingStubbing#thenThrow(Throwable...)}
          * @since 1.8.0
          */
+        @CanIgnoreReturnValue
         BDDMyOngoingStubbing<T> willThrow(Throwable... throwables);
 
         /**
          * See original {@link OngoingStubbing#thenThrow(Class)}
          * @since 2.1.0
          */
+        @CanIgnoreReturnValue
         BDDMyOngoingStubbing<T> willThrow(Class<? extends Throwable> throwableType);
 
         /**
@@ -131,6 +137,7 @@ public class BDDMockito extends Mockito {
         // Additional method helps users of JDK7+ to hide heap pollution / unchecked generics array
         // creation
         @SuppressWarnings({"unchecked", "varargs"})
+        @CanIgnoreReturnValue
         BDDMyOngoingStubbing<T> willThrow(
                 Class<? extends Throwable> throwableType,
                 Class<? extends Throwable>... throwableTypes);
@@ -139,6 +146,7 @@ public class BDDMockito extends Mockito {
          * See original {@link OngoingStubbing#thenCallRealMethod()}
          * @since 1.9.0
          */
+        @CanIgnoreReturnValue
         BDDMyOngoingStubbing<T> willCallRealMethod();
 
         /**
@@ -156,30 +164,37 @@ public class BDDMockito extends Mockito {
             this.mockitoOngoingStubbing = ongoingStubbing;
         }
 
+        @CanIgnoreReturnValue
         public BDDMyOngoingStubbing<T> willAnswer(Answer<?> answer) {
             return new BDDOngoingStubbingImpl<T>(mockitoOngoingStubbing.thenAnswer(answer));
         }
 
+        @CanIgnoreReturnValue
         public BDDMyOngoingStubbing<T> will(Answer<?> answer) {
             return new BDDOngoingStubbingImpl<T>(mockitoOngoingStubbing.then(answer));
         }
 
+        @CanIgnoreReturnValue
         public BDDMyOngoingStubbing<T> willReturn(@Nullable T value) {
             return new BDDOngoingStubbingImpl<T>(mockitoOngoingStubbing.thenReturn(value));
         }
 
+        @CanIgnoreReturnValue
         public BDDMyOngoingStubbing<T> willReturn(@Nullable T value, @Nullable T... values) {
             return new BDDOngoingStubbingImpl<T>(mockitoOngoingStubbing.thenReturn(value, values));
         }
 
+        @CanIgnoreReturnValue
         public BDDMyOngoingStubbing<T> willThrow(Throwable... throwables) {
             return new BDDOngoingStubbingImpl<T>(mockitoOngoingStubbing.thenThrow(throwables));
         }
 
+        @CanIgnoreReturnValue
         public BDDMyOngoingStubbing<T> willThrow(Class<? extends Throwable> throwableType) {
             return new BDDOngoingStubbingImpl<T>(mockitoOngoingStubbing.thenThrow(throwableType));
         }
 
+        @CanIgnoreReturnValue
         public BDDMyOngoingStubbing<T> willThrow(
                 Class<? extends Throwable> throwableType,
                 Class<? extends Throwable>... throwableTypes) {
@@ -187,6 +202,7 @@ public class BDDMockito extends Mockito {
                     mockitoOngoingStubbing.thenThrow(throwableType, throwableTypes));
         }
 
+        @CanIgnoreReturnValue
         public BDDMyOngoingStubbing<T> willCallRealMethod() {
             return new BDDOngoingStubbingImpl<T>(mockitoOngoingStubbing.thenCallRealMethod());
         }

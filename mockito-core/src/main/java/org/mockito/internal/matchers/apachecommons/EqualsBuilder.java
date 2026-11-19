@@ -4,6 +4,7 @@
  */
 package org.mockito.internal.matchers.apachecommons;
 
+import org.mockito.CanIgnoreReturnValue;
 import org.mockito.internal.configuration.plugins.Plugins;
 import org.mockito.plugins.MemberAccessor;
 
@@ -323,6 +324,7 @@ class EqualsBuilder {
      * @return EqualsBuilder - used to chain calls.
      * @since 2.1.0
      */
+    @CanIgnoreReturnValue
     public EqualsBuilder appendSuper(boolean superEquals) {
         isEquals &= superEquals;
         return this;
@@ -338,6 +340,7 @@ class EqualsBuilder {
      * @param rhs  the right hand object
      * @return EqualsBuilder - used to chain calls.
      */
+    @CanIgnoreReturnValue
     public EqualsBuilder append(Object lhs, Object rhs) {
         if (!isEquals) {
             return this;
@@ -397,6 +400,7 @@ class EqualsBuilder {
      *                  the right hand <code>long</code>
      * @return EqualsBuilder - used to chain calls.
      */
+    @CanIgnoreReturnValue
     public EqualsBuilder append(long lhs, long rhs) {
         isEquals &= (lhs == rhs);
         return this;
@@ -409,6 +413,7 @@ class EqualsBuilder {
      * @param rhs  the right hand <code>int</code>
      * @return EqualsBuilder - used to chain calls.
      */
+    @CanIgnoreReturnValue
     public EqualsBuilder append(int lhs, int rhs) {
         isEquals &= (lhs == rhs);
         return this;
@@ -421,6 +426,7 @@ class EqualsBuilder {
      * @param rhs  the right hand <code>short</code>
      * @return EqualsBuilder - used to chain calls.
      */
+    @CanIgnoreReturnValue
     public EqualsBuilder append(short lhs, short rhs) {
         isEquals &= (lhs == rhs);
         return this;
@@ -433,6 +439,7 @@ class EqualsBuilder {
      * @param rhs  the right hand <code>char</code>
      * @return EqualsBuilder - used to chain calls.
      */
+    @CanIgnoreReturnValue
     public EqualsBuilder append(char lhs, char rhs) {
         isEquals &= (lhs == rhs);
         return this;
@@ -445,6 +452,7 @@ class EqualsBuilder {
      * @param rhs  the right hand <code>byte</code>
      * @return EqualsBuilder - used to chain calls.
      */
+    @CanIgnoreReturnValue
     public EqualsBuilder append(byte lhs, byte rhs) {
         isEquals &= (lhs == rhs);
         return this;
@@ -463,6 +471,7 @@ class EqualsBuilder {
      * @param rhs  the right hand <code>double</code>
      * @return EqualsBuilder - used to chain calls.
      */
+    @CanIgnoreReturnValue
     public EqualsBuilder append(double lhs, double rhs) {
         if (!isEquals) {
             return this;
@@ -483,6 +492,7 @@ class EqualsBuilder {
      * @param rhs  the right hand <code>float</code>
      * @return EqualsBuilder - used to chain calls.
      */
+    @CanIgnoreReturnValue
     public EqualsBuilder append(float lhs, float rhs) {
         if (!isEquals) {
             return this;
@@ -497,6 +507,7 @@ class EqualsBuilder {
      * @param rhs  the right hand <code>boolean</code>
      * @return EqualsBuilder - used to chain calls.
      */
+    @CanIgnoreReturnValue
     public EqualsBuilder append(boolean lhs, boolean rhs) {
         isEquals &= (lhs == rhs);
         return this;
@@ -512,6 +523,7 @@ class EqualsBuilder {
      * @param rhs  the right hand <code>Object[]</code>
      * @return EqualsBuilder - used to chain calls.
      */
+    @CanIgnoreReturnValue
     public EqualsBuilder append(Object[] lhs, Object[] rhs) {
         if (!isEquals) {
             return this;
@@ -543,6 +555,7 @@ class EqualsBuilder {
      * @param rhs  the right hand <code>long[]</code>
      * @return EqualsBuilder - used to chain calls.
      */
+    @CanIgnoreReturnValue
     public EqualsBuilder append(long[] lhs, long[] rhs) {
         if (!isEquals) {
             return this;
@@ -574,6 +587,7 @@ class EqualsBuilder {
      * @param rhs  the right hand <code>int[]</code>
      * @return EqualsBuilder - used to chain calls.
      */
+    @CanIgnoreReturnValue
     public EqualsBuilder append(int[] lhs, int[] rhs) {
         if (!isEquals) {
             return this;
@@ -605,6 +619,7 @@ class EqualsBuilder {
      * @param rhs  the right hand <code>short[]</code>
      * @return EqualsBuilder - used to chain calls.
      */
+    @CanIgnoreReturnValue
     public EqualsBuilder append(short[] lhs, short[] rhs) {
         if (!isEquals) {
             return this;
@@ -636,6 +651,7 @@ class EqualsBuilder {
      * @param rhs  the right hand <code>char[]</code>
      * @return EqualsBuilder - used to chain calls.
      */
+    @CanIgnoreReturnValue
     public EqualsBuilder append(char[] lhs, char[] rhs) {
         if (!isEquals) {
             return this;
@@ -667,6 +683,7 @@ class EqualsBuilder {
      * @param rhs  the right hand <code>byte[]</code>
      * @return EqualsBuilder - used to chain calls.
      */
+    @CanIgnoreReturnValue
     public EqualsBuilder append(byte[] lhs, byte[] rhs) {
         if (!isEquals) {
             return this;
@@ -698,6 +715,7 @@ class EqualsBuilder {
      * @param rhs  the right hand <code>double[]</code>
      * @return EqualsBuilder - used to chain calls.
      */
+    @CanIgnoreReturnValue
     public EqualsBuilder append(double[] lhs, double[] rhs) {
         if (!isEquals) {
             return this;
@@ -729,6 +747,7 @@ class EqualsBuilder {
      * @param rhs  the right hand <code>float[]</code>
      * @return EqualsBuilder - used to chain calls.
      */
+    @CanIgnoreReturnValue
     public EqualsBuilder append(float[] lhs, float[] rhs) {
         if (!isEquals) {
             return this;
@@ -760,6 +779,7 @@ class EqualsBuilder {
      * @param rhs  the right hand <code>boolean[]</code>
      * @return EqualsBuilder - used to chain calls.
      */
+    @CanIgnoreReturnValue
     public EqualsBuilder append(boolean[] lhs, boolean[] rhs) {
         if (!isEquals) {
             return this;

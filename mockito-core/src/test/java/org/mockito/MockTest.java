@@ -26,7 +26,7 @@ public class MockTest {
 
         @Test
         public void should_have_matching_enum_in_mock_strictness_enum() {
-            Mock.Strictness.valueOf(strictness.name());
+            Mock.Strictness unused = Mock.Strictness.valueOf(strictness.name());
         }
 
         @Parameterized.Parameters(name = "{0}")
@@ -47,7 +47,8 @@ public class MockTest {
         @Test
         public void should_have_matching_enum_in_strictness_enum() {
             assumeThat("Ignore NOT_SET", strictness, not(Mock.Strictness.TEST_LEVEL_DEFAULT));
-            org.mockito.quality.Strictness.valueOf(strictness.name());
+            org.mockito.quality.Strictness unused =
+                    org.mockito.quality.Strictness.valueOf(strictness.name());
         }
 
         @Parameterized.Parameters(name = "{0}")

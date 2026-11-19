@@ -122,7 +122,7 @@ public class FieldInitializerTest {
 
     @Test
     public void should_not_fail_if_abstract_field_is_instantiated() throws Exception {
-        new FieldInitializer(this, field("instantiatedAbstractType"));
+        FieldInitializer ignored = new FieldInitializer(this, field("instantiatedAbstractType"));
     }
 
     @Test
@@ -137,7 +137,7 @@ public class FieldInitializerTest {
 
     @Test
     public void should_not_fail_if_interface_field_is_instantiated() throws Exception {
-        new FieldInitializer(this, field("instantiatedInterfaceType"));
+        FieldInitializer ignored = new FieldInitializer(this, field("instantiatedInterfaceType"));
     }
 
     @Test
@@ -174,8 +174,9 @@ public class FieldInitializerTest {
         TheTestWithLocalType testWithLocalType = new TheTestWithLocalType();
 
         // when
-        new FieldInitializer(
-                testWithLocalType, testWithLocalType.getClass().getDeclaredField("field"));
+        FieldInitializer ignored =
+                new FieldInitializer(
+                        testWithLocalType, testWithLocalType.getClass().getDeclaredField("field"));
     }
 
     @Test
@@ -190,7 +191,7 @@ public class FieldInitializerTest {
 
     @Test
     public void should_not_fail_if_inner_class_field_is_instantiated() throws Exception {
-        new FieldInitializer(this, field("instantiatedInnerClassType"));
+        FieldInitializer ignored = new FieldInitializer(this, field("instantiatedInnerClassType"));
     }
 
     @Test
@@ -202,7 +203,8 @@ public class FieldInitializerTest {
                         .willReturn(new Object[] {null})
                         .getMock();
 
-        new FieldInitializer(this, field("noDefaultConstructor"), resolver).initialize();
+        FieldInitializationReport ignored =
+                new FieldInitializer(this, field("noDefaultConstructor"), resolver).initialize();
 
         assertNotNull(noDefaultConstructor);
     }

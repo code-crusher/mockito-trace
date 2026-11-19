@@ -4,6 +4,7 @@
  */
 package org.mockito.stubbing;
 
+import org.mockito.CanIgnoreReturnValue;
 import org.mockito.Mockito;
 import org.mockito.NotExtensible;
 
@@ -28,6 +29,7 @@ public interface BaseStubber {
      * @param toBeThrown to be thrown when the stubbed method is called
      * @return stubber - to select a method for stubbing
      */
+    @CanIgnoreReturnValue
     Stubber doThrow(Throwable... toBeThrown);
 
     /**
@@ -44,6 +46,7 @@ public interface BaseStubber {
      *
      * @since 2.1.0
      */
+    @CanIgnoreReturnValue
     Stubber doThrow(Class<? extends Throwable> toBeThrown);
 
     /**
@@ -64,6 +67,7 @@ public interface BaseStubber {
     // Additional method helps users of JDK7+ to hide heap pollution / unchecked generics array
     // creation
     @SuppressWarnings({"unchecked", "varargs"})
+    @CanIgnoreReturnValue
     Stubber doThrow(
             Class<? extends Throwable> toBeThrown, Class<? extends Throwable>... nextToBeThrown);
 
@@ -79,6 +83,7 @@ public interface BaseStubber {
      * @param answer to answer when the stubbed method is called
      * @return stubber - to select a method for stubbing
      */
+    @CanIgnoreReturnValue
     Stubber doAnswer(Answer answer);
 
     /**
@@ -92,6 +97,7 @@ public interface BaseStubber {
      *
      * @return stubber - to select a method for stubbing
      */
+    @CanIgnoreReturnValue
     Stubber doNothing();
 
     /**
@@ -102,6 +108,7 @@ public interface BaseStubber {
      * @param toBeReturned to be returned when the stubbed method is called
      * @return stubber - to select a method for stubbing
      */
+    @CanIgnoreReturnValue
     Stubber doReturn(Object toBeReturned);
 
     /**
@@ -114,6 +121,7 @@ public interface BaseStubber {
      * @return stubber - to select a method for stubbing
      */
     @SuppressWarnings({"unchecked", "varargs"})
+    @CanIgnoreReturnValue
     Stubber doReturn(Object toBeReturned, Object... nextToBeReturned);
 
     /**
@@ -123,5 +131,6 @@ public interface BaseStubber {
      *
      * @return stubber - to select a method for stubbing
      */
+    @CanIgnoreReturnValue
     Stubber doCallRealMethod();
 }

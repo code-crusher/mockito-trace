@@ -107,7 +107,7 @@ public class InlineBytecodeGeneratorTest {
     }
 
     private static InlineBytecodeGenerator newGenerator(Instrumentation instrumentation) {
-        new InlineByteBuddyMockMaker();
+        InlineByteBuddyMockMaker unused = new InlineByteBuddyMockMaker();
         return new InlineBytecodeGenerator(
                 instrumentation,
                 new WeakConcurrentMap<>(false),

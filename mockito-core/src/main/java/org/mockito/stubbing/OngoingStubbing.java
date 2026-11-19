@@ -5,6 +5,7 @@
 package org.mockito.stubbing;
 
 import org.jspecify.annotations.Nullable;
+import org.mockito.CanIgnoreReturnValue;
 import org.mockito.Mockito;
 import org.mockito.NotExtensible;
 
@@ -48,6 +49,7 @@ public interface OngoingStubbing<T> {
      *
      * @return object that allows stubbing consecutive calls
      */
+    @CanIgnoreReturnValue
     OngoingStubbing<T> thenReturn(@Nullable T value);
 
     /**
@@ -68,6 +70,7 @@ public interface OngoingStubbing<T> {
     // Additional method helps users of JDK7+ to hide heap pollution / unchecked generics array
     // creation warnings (on call site)
     @SuppressWarnings({"unchecked", "varargs"})
+    @CanIgnoreReturnValue
     OngoingStubbing<T> thenReturn(@Nullable T value, @Nullable T... values);
 
     /**
@@ -90,6 +93,7 @@ public interface OngoingStubbing<T> {
      *
      * @return object that allows stubbing consecutive calls
      */
+    @CanIgnoreReturnValue
     OngoingStubbing<T> thenThrow(Throwable... throwables);
 
     /**
@@ -115,6 +119,7 @@ public interface OngoingStubbing<T> {
      * @return object that allows stubbing consecutive calls
      * @since 2.1.0
      */
+    @CanIgnoreReturnValue
     OngoingStubbing<T> thenThrow(Class<? extends Throwable> throwableType);
 
     /**
@@ -151,6 +156,7 @@ public interface OngoingStubbing<T> {
     // Additional method helps users of JDK7+ to hide heap pollution / unchecked generics array
     // creation warnings (on call site)
     @SuppressWarnings({"unchecked", "varargs"})
+    @CanIgnoreReturnValue
     OngoingStubbing<T> thenThrow(
             Class<? extends Throwable> toBeThrown, Class<? extends Throwable>... nextToBeThrown);
 
@@ -183,6 +189,7 @@ public interface OngoingStubbing<T> {
      *
      * @return object that allows stubbing consecutive calls
      */
+    @CanIgnoreReturnValue
     OngoingStubbing<T> thenCallRealMethod();
 
     /**
@@ -199,6 +206,7 @@ public interface OngoingStubbing<T> {
      *
      * @return object that allows stubbing consecutive calls
      */
+    @CanIgnoreReturnValue
     OngoingStubbing<T> thenAnswer(Answer<?> answer);
 
     /**
@@ -220,6 +228,7 @@ public interface OngoingStubbing<T> {
      * @see #thenAnswer(Answer)
      * @since 1.9.0
      */
+    @CanIgnoreReturnValue
     OngoingStubbing<T> then(Answer<?> answer);
 
     /**

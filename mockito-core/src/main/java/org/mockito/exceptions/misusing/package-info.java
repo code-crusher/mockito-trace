@@ -6,4 +6,5 @@
 /**
  * Exceptions thrown when Mockito is misused.
  */
+@org.mockito.CheckReturnValue
 package org.mockito.exceptions.misusing;

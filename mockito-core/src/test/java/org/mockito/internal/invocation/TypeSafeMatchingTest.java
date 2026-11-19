@@ -131,11 +131,11 @@ public class TypeSafeMatchingTest {
             }
         }
         wasCalled.set(false);
-        matchesTypeSafe().apply(new TestMatcher(), 123);
+        boolean unused = matchesTypeSafe().apply(new TestMatcher(), 123);
         assertThat(wasCalled.get()).isTrue();
 
         wasCalled.set(false);
-        matchesTypeSafe().apply(new TestMatcher(), "");
+        boolean alsoUnused = matchesTypeSafe().apply(new TestMatcher(), "");
         assertThat(wasCalled.get()).isFalse();
     }
 
@@ -151,11 +151,11 @@ public class TypeSafeMatchingTest {
         }
 
         wasCalled.set(false);
-        matchesTypeSafe().apply(new GenericMatcher<Integer>(), 123);
+        boolean unused = matchesTypeSafe().apply(new GenericMatcher<Integer>(), 123);
         assertThat(wasCalled.get()).isTrue();
 
         wasCalled.set(false);
-        matchesTypeSafe().apply(new GenericMatcher<Integer>(), "");
+        boolean alsoUnused = matchesTypeSafe().apply(new GenericMatcher<Integer>(), "");
         assertThat(wasCalled.get()).isTrue();
     }
 }

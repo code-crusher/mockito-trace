@@ -28,6 +28,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.platform.commons.util.Preconditions;
 import org.mockito.ArgumentMatchers;
+import org.mockito.CanIgnoreReturnValue;
 import org.mockito.MockSettings;
 import org.mockito.MockedStatic;
 import org.mockito.StateMaster;
@@ -52,6 +53,7 @@ class PersonWithName {
     }
 }
 
+@CanIgnoreReturnValue
 class HasStatic {
     public static String staticName() {
         return "static name";
@@ -186,7 +188,7 @@ public class DefaultMockitoFrameworkTest extends TestBase {
         framework.clearInlineMocks();
 
         try {
-            obj.getMyName();
+            String unused = obj.getMyName();
         } catch (DisabledMockException e) {
             return;
         }
@@ -223,7 +225,7 @@ public class DefaultMockitoFrameworkTest extends TestBase {
         framework.clearInlineMocks();
 
         try {
-            mockingDetails(obj).isMock();
+            boolean unused = mockingDetails(obj).isMock();
         } catch (DisabledMockException e) {
             return;
         }

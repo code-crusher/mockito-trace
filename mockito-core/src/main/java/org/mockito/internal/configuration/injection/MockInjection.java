@@ -13,6 +13,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.mockito.CanIgnoreReturnValue;
+
 /**
  * Internal injection configuration utility.
  *
@@ -63,21 +65,25 @@ public final class MockInjection {
             this.fields.addAll(checkItemsNotNull(fields, "fields"));
         }
 
+        @CanIgnoreReturnValue
         public OngoingMockInjection withMocks(Set<Object> mocks) {
             this.mocks.addAll(checkNotNull(mocks, "mocks"));
             return this;
         }
 
+        @CanIgnoreReturnValue
         public OngoingMockInjection tryConstructorInjection() {
             injectionStrategies.thenTry(new ConstructorInjection());
             return this;
         }
 
+        @CanIgnoreReturnValue
         public OngoingMockInjection tryPropertyOrFieldInjection() {
             injectionStrategies.thenTry(new PropertyAndSetterInjection());
             return this;
         }
 
+        @CanIgnoreReturnValue
         public OngoingMockInjection handleSpyAnnotation() {
             postInjectionStrategies.thenTry(new SpyOnInjectedFieldsHandler());
             return this;

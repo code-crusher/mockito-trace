@@ -5,6 +5,7 @@
 package org.mockito.junit;
 
 import org.junit.rules.TestRule;
+import org.mockito.CanIgnoreReturnValue;
 import org.mockito.exceptions.base.MockitoAssertionError;
 
 /**
@@ -93,5 +94,6 @@ public interface VerificationCollector extends TestRule {
      * @return this
      * @since 2.1.0
      */
+    @CanIgnoreReturnValue
     VerificationCollector assertLazily();
 }

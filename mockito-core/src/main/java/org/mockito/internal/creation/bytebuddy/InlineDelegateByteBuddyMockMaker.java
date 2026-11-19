@@ -4,6 +4,7 @@
  */
 package org.mockito.internal.creation.bytebuddy;
 
+import org.mockito.CanIgnoreReturnValue;
 import org.mockito.MockedConstruction;
 import org.mockito.creation.instance.InstantiationException;
 import org.mockito.creation.instance.Instantiator;
@@ -429,6 +430,7 @@ class InlineDelegateByteBuddyMockMaker
     }
 
     @Override
+    @CanIgnoreReturnValue
     public <T> Class<? extends T> createMockType(MockCreationSettings<T> settings) {
         try {
             return bytecodeGenerator.mockClass(

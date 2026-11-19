@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.mockito.CanIgnoreReturnValue;
 import org.mockito.internal.util.Checks;
 
 /**
@@ -70,11 +71,13 @@ public class HashCodeAndEqualsSafeSet implements Set<Object> {
     }
 
     @Override
+    @CanIgnoreReturnValue
     public boolean add(Object mock) {
         return backingHashSet.add(HashCodeAndEqualsMockWrapper.of(mock));
     }
 
     @Override
+    @CanIgnoreReturnValue
     public boolean remove(Object mock) {
         return backingHashSet.remove(HashCodeAndEqualsMockWrapper.of(mock));
     }
@@ -127,6 +130,7 @@ public class HashCodeAndEqualsSafeSet implements Set<Object> {
         return array;
     }
 
+    @CanIgnoreReturnValue
     public boolean removeAll(Collection<?> mocks) {
         return backingHashSet.removeAll(asWrappedMocks(mocks));
     }
@@ -137,11 +141,13 @@ public class HashCodeAndEqualsSafeSet implements Set<Object> {
     }
 
     @Override
+    @CanIgnoreReturnValue
     public boolean addAll(Collection<?> mocks) {
         return backingHashSet.addAll(asWrappedMocks(mocks));
     }
 
     @Override
+    @CanIgnoreReturnValue
     public boolean retainAll(Collection<?> mocks) {
         return backingHashSet.retainAll(asWrappedMocks(mocks));
     }

@@ -68,6 +68,7 @@ public interface MockSettings extends Serializable {
      * @param interfaces extra interfaces the mock should implement.
      * @return settings instance so that you can fluently specify other settings
      */
+    @CanIgnoreReturnValue
     MockSettings extraInterfaces(Class<?>... interfaces);
 
     /**
@@ -88,6 +89,7 @@ public interface MockSettings extends Serializable {
      * @param name the name of the mock, later used in all verification errors
      * @return settings instance so that you can fluently specify other settings
      */
+    @CanIgnoreReturnValue
     MockSettings name(String name);
 
     /**
@@ -130,6 +132,7 @@ public interface MockSettings extends Serializable {
      * @param instance to spy on
      * @return settings instance so that you can fluently specify other settings
      */
+    @CanIgnoreReturnValue
     MockSettings spiedInstance(Object instance);
 
     /**
@@ -151,6 +154,7 @@ public interface MockSettings extends Serializable {
      * @return settings instance so that you can fluently specify other settings
      */
     @SuppressWarnings("unchecked")
+    @CanIgnoreReturnValue
     MockSettings defaultAnswer(Answer defaultAnswer);
 
     /**
@@ -169,6 +173,7 @@ public interface MockSettings extends Serializable {
      * @return settings instance so that you can fluently specify other settings
      * @since 1.8.1
      */
+    @CanIgnoreReturnValue
     MockSettings serializable();
 
     /**
@@ -188,6 +193,7 @@ public interface MockSettings extends Serializable {
      * @return settings instance so that you can fluently specify other settings
      * @since 1.10.0
      */
+    @CanIgnoreReturnValue
     MockSettings serializable(SerializableMode mode);
 
     /**
@@ -205,6 +211,7 @@ public interface MockSettings extends Serializable {
      *
      * @return settings instance so that you can fluently specify other settings
      */
+    @CanIgnoreReturnValue
     MockSettings verboseLogging();
 
     /**
@@ -223,6 +230,7 @@ public interface MockSettings extends Serializable {
      * @return settings instance so that you can fluently specify other settings
      * @since 2.24.6
      */
+    @CanIgnoreReturnValue
     MockSettings stubbingLookupListeners(StubbingLookupListener... listeners);
 
     /**
@@ -241,6 +249,7 @@ public interface MockSettings extends Serializable {
      * @param listeners The invocation listeners to add. May not be null.
      * @return settings instance so that you can fluently specify other settings
      */
+    @CanIgnoreReturnValue
     MockSettings invocationListeners(InvocationListener... listeners);
 
     /**
@@ -257,6 +266,7 @@ public interface MockSettings extends Serializable {
      * @return settings instance so that you can fluently specify other settings
      * @since 2.11.0
      */
+    @CanIgnoreReturnValue
     MockSettings verificationStartedListeners(VerificationStartedListener... listeners);
 
     /**
@@ -271,6 +281,7 @@ public interface MockSettings extends Serializable {
      *
      * @return settings instance so that you can fluently specify other settings
      */
+    @CanIgnoreReturnValue
     MockSettings stubOnly();
 
     /**
@@ -297,6 +308,7 @@ public interface MockSettings extends Serializable {
      * @return settings instance so that you can fluently specify other settings
      * @since 2.7.14 (useConstructor with no arguments was supported since 1.10.12)
      */
+    @CanIgnoreReturnValue
     MockSettings useConstructor(Object... args);
 
     /**
@@ -311,6 +323,7 @@ public interface MockSettings extends Serializable {
      * @return settings instance so that you can fluently specify other settings
      * @since 1.10.12
      */
+    @CanIgnoreReturnValue
     MockSettings outerInstance(Object outerClassInstance);
 
     /**
@@ -321,6 +334,7 @@ public interface MockSettings extends Serializable {
      * @return settings instance so that you can fluently specify other settings
      * @since 1.10.13
      */
+    @CanIgnoreReturnValue
     MockSettings withoutAnnotations();
 
     /**
@@ -365,6 +379,7 @@ public interface MockSettings extends Serializable {
      * For more information and an elaborate example, see {@link Mockito#lenient()}.
      */
     @Deprecated
+    @CanIgnoreReturnValue
     MockSettings lenient();
 
     /**
@@ -382,6 +397,7 @@ public interface MockSettings extends Serializable {
      * @return settings instance so that you can fluently specify other settings
      * @since 4.6.0
      */
+    @CanIgnoreReturnValue
     MockSettings strictness(Strictness strictness);
 
     /**
@@ -403,6 +419,7 @@ public interface MockSettings extends Serializable {
      * @return settings instance so that you can fluently specify other settings
      * @since 4.8.0
      */
+    @CanIgnoreReturnValue
     MockSettings mockMaker(String mockMaker);
 
     /**
@@ -410,5 +427,6 @@ public interface MockSettings extends Serializable {
      * @param genericTypeToMock
      * @return
      */
+    @CanIgnoreReturnValue
     MockSettings genericTypeToMock(Type genericTypeToMock);
 }

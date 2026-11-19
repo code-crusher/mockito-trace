@@ -144,7 +144,7 @@ public class HamcrestMatchersTest extends TestBase {
 
     @SuppressWarnings("unchecked")
     private int nonGenericMatcher() {
-        argThat(new NonGenericMatcher());
+        Object unused = argThat(new NonGenericMatcher());
         return 0;
     }
 

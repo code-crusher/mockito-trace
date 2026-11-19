@@ -10,6 +10,8 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.internal.creation.settings.CreationSettings;
 import org.mockito.internal.handler.MockHandlerImpl;
+import org.mockito.invocation.MockHandler;
+import org.mockito.plugins.MockMaker.TypeMockability;
 import org.mockitoutil.TestBase;
 
 public class ByteBuddyMockMakerTest extends TestBase {
@@ -23,10 +25,10 @@ public class ByteBuddyMockMakerTest extends TestBase {
         CreationSettings<Object> creationSettings = new CreationSettings<Object>();
         MockHandlerImpl<Object> handler = new MockHandlerImpl<Object>(creationSettings);
 
-        mockMaker.createMockType(creationSettings);
-        mockMaker.createMock(creationSettings, handler);
-        mockMaker.getHandler(this);
-        mockMaker.isTypeMockable(Object.class);
+        Class<?> unusedType = mockMaker.createMockType(creationSettings);
+        Object unusedMock = mockMaker.createMock(creationSettings, handler);
+        MockHandler<?> unusedHandler = mockMaker.getHandler(this);
+        TypeMockability unusedMockability = mockMaker.isTypeMockable(Object.class);
         mockMaker.resetMock(this, handler, creationSettings);
 
         verify(delegate).createMock(creationSettings, handler);

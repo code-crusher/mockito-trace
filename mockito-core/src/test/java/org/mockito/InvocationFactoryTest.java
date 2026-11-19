@@ -40,7 +40,7 @@ public class InvocationFactoryTest extends TestBase {
                                 });
 
         try {
-            Mockito.mockingDetails(mock).getMockHandler().handle(invocation);
+            Object unused = Mockito.mockingDetails(mock).getMockHandler().handle(invocation);
         } catch (Throwable t) {
             assertEquals("mocked", t.getMessage());
             return;

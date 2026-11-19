@@ -270,8 +270,8 @@ public class MocksSerializationForAnnotationTest extends TestBase implements Ser
         private String string;
 
         public Object answer(InvocationOnMock invocation) throws Throwable {
-            invocation.getArguments();
-            invocation.getMock();
+            Object[] unused = invocation.getArguments();
+            Object unusedMock = invocation.getMock();
             return string;
         }
     }
@@ -316,7 +316,7 @@ public class MocksSerializationForAnnotationTest extends TestBase implements Ser
 
         // then
         Any readObject = deserializeMock(serialized, Any.class);
-        readObject.matches("");
+        boolean unused = readObject.matches("");
     }
 
     class AlreadySerializable implements Serializable {}

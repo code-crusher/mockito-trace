@@ -6,4 +6,5 @@
 /**
  * Stack trace filtering / cleaning public APIs.
  */
+@org.mockito.CheckReturnValue
 package org.mockito.exceptions.stacktrace;

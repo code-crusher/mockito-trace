@@ -10,6 +10,7 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.mockito.exceptions.base.MockitoException;
 import org.mockito.internal.verification.VerificationModeFactory;
+import org.mockito.verification.VerificationMode;
 import org.mockitoutil.TestBase;
 
 public class AtLeastTest extends TestBase {
@@ -26,6 +27,6 @@ public class AtLeastTest extends TestBase {
 
     @Test
     public void shouldAllowZeroInvocations() throws Exception {
-        VerificationModeFactory.atLeast(0);
+        VerificationMode unused = VerificationModeFactory.atLeast(0);
     }
 }
