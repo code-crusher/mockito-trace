@@ -25,6 +25,15 @@ public interface MockingProgress {
 
     void verificationStarted(VerificationMode verificationMode);
 
+    /**
+     * Returns whether a verification started with {@link #verificationStarted(VerificationMode)}
+     * is currently awaiting execution, without consuming it.
+     *
+     * <p>Used to distinguish invocations triggered by a verification callback from real method
+     * invocations - see issue #3739.
+     */
+    boolean isVerifyingMode();
+
     VerificationMode pullVerificationMode();
 
     void stubbingStarted(StubbingStyle style);

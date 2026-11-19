@@ -5,6 +5,7 @@
 package org.mockito.internal.handler;
 
 import static org.mockito.internal.exceptions.Reporter.invocationListenerThrewException;
+import static org.mockito.internal.progress.ThreadSafeMockingProgress.mockingProgress;
 
 import java.util.List;
 
@@ -30,6 +31,12 @@ class InvocationNotifierHandler<T> implements MockHandler<T> {
 
     @Override
     public Object handle(Invocation invocation) throws Throwable {
+        if (mockingProgress().isVerifyingMode()) {
+            // this invocation was triggered by a verification callback and does not
+            // represent a real method invocation on the mock, so listeners are not notified
+            // - see issue #3739
+            return mockHandler.handle(invocation);
+        }
         try {
             Object returnedValue = mockHandler.handle(invocation);
             notifyMethodCall(invocation, returnedValue);

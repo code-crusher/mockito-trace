@@ -94,6 +94,11 @@ public class MockingProgressImpl implements MockingProgress {
     }
 
     @Override
+    public boolean isVerifyingMode() {
+        return verificationMode != null;
+    }
+
+    @Override
     public VerificationMode pullVerificationMode() {
         if (verificationMode == null) {
             return null;

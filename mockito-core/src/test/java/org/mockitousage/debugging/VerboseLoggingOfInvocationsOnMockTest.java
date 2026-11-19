@@ -5,6 +5,7 @@
 package org.mockitousage.debugging;
 
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
@@ -17,8 +18,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.invocation.Invocation;
 import org.mockito.internal.util.MockUtil;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.listeners.InvocationListener;
+import org.mockito.listeners.MethodInvocationReport;
 
 /**
  * Tests the verbose logging of invocation on mock methods.
@@ -148,6 +152,59 @@ public class VerboseLoggingOfInvocationsOnMockTest {
         foo.giveMeSomeString("Shure");
         foo.giveMeSomeString("Apple");
         foo.doSomething("Klipsch");
+    }
+
+    @Test
+    public void shouldNotPrintInvocationWhenVerifying() {
+        // given
+        Foo foo = mock(Foo.class, withSettings().verboseLogging());
+        foo.giveMeSomeString("Klipsch");
+
+        // when
+        output.reset();
+        verify(foo).giveMeSomeString("Klipsch");
+
+        // then
+        Assertions.assertThat(printed())
+                .doesNotContain("Logging method invocation")
+                .doesNotContain("giveMeSomeString");
+    }
+
+    @Test
+    public void shouldPrintInvocationAfterVerificationCompleted() {
+        // given
+        Foo foo = mock(Foo.class, withSettings().verboseLogging());
+        foo.giveMeSomeString("Klipsch");
+
+        // when
+        verify(foo).giveMeSomeString("Klipsch");
+        output.reset();
+        foo.giveMeSomeString("Shure");
+
+        // then
+        Assertions.assertThat(printed())
+                .contains(mockName(foo))
+                .contains("giveMeSomeString")
+                .contains("Shure");
+    }
+
+    @Test
+    public void shouldNotifyInvocationListenerOnlyForRealInvocations() {
+        // given
+        InvocationListener listener = mock(InvocationListener.class);
+        Foo foo = mock(Foo.class, withSettings().invocationListeners(listener));
+
+        // when
+        foo.giveMeSomeString("Klipsch");
+        verify(foo).giveMeSomeString("Klipsch");
+
+        // then
+        verify(listener, times(1))
+                .reportInvocation(argThat(report -> "Klipsch".equals(argsOf(report)[0])));
+    }
+
+    private static Object[] argsOf(MethodInvocationReport report) {
+        return ((Invocation) report.getInvocation()).getArguments();
     }
 
     private String printed() {
