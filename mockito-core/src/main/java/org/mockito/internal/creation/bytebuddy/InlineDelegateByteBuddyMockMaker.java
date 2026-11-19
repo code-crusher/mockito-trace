@@ -112,6 +112,26 @@ class InlineDelegateByteBuddyMockMaker
 
     private static final Throwable INITIALIZATION_ERROR;
 
+    /**
+     * Locates the raw class file of the {@code MockMethodDispatcher} that is injected into the
+     * bootstrap class loader. The resource is primarily resolved using the class loader that
+     * defined Mockito, as before. If this loader does not resolve the resource, for example
+     * because a container such as Payara, WildFly or OSGi provides a restricted view onto the
+     * Mockito jar, the system class loader is consulted as a fallback.
+     */
+    private static InputStream locateDispatcherResource() {
+        InputStream inputStream =
+                InlineDelegateByteBuddyMockMaker.class.getResourceAsStream(
+                        "inject-MockMethodDispatcher.raw");
+        if (inputStream == null) {
+            inputStream =
+                    ClassLoader.getSystemClassLoader()
+                            .getResourceAsStream(
+                                    "org/mockito/internal/creation/bytebuddy/inject-MockMethodDispatcher.raw");
+        }
+        return inputStream;
+    }
+
     static {
         Instrumentation instrumentation;
         Throwable initializationError = null;
@@ -141,9 +161,14 @@ class InlineDelegateByteBuddyMockMaker
                 boot.deleteOnExit();
                 try (JarOutputStream outputStream =
                         new JarOutputStream(new FileOutputStream(boot))) {
-                    InputStream inputStream =
-                            InlineDelegateByteBuddyMockMaker.class.getResourceAsStream(
-                                    "inject-MockMethodDispatcher.raw");
+                    // The dispatcher's class file is looked up as a raw resource because the
+                    // class must only ever be defined by the bootstrap class loader. Mockito
+                    // might however be loaded by a container class loader (such as the module
+                    // loaders of Payara, WildFly or OSGi) that does not resolve resources from
+                    // the jar Mockito was actually loaded from. As a fallback, the system class
+                    // loader is queried, which always resolves the jar of a well-formed
+                    // application class path. See also issue #3769.
+                    InputStream inputStream = locateDispatcherResource();
                     if (inputStream == null) {
                         throw new IllegalStateException(
                                 join(
@@ -158,7 +183,10 @@ class InlineDelegateByteBuddyMockMaker
                                         "",
                                         "The module responsible for looking up the resource: "
                                                 + InlineDelegateByteBuddyMockMaker.class
-                                                        .getModule()));
+                                                        .getModule(),
+                                        "",
+                                        "The system class loader used as a fallback: "
+                                                + ClassLoader.getSystemClassLoader()));
                     }
                     try (inputStream) {
                         outputStream.putNextEntry(

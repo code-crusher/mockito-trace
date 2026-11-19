@@ -553,6 +553,18 @@ public class InlineDelegateByteBuddyMockMakerTest
                 .isNull();
     }
 
+    @Test
+    public void testMockDispatcherRawResourceIsResolvableBySystemClassLoader() {
+        // When Mockito is loaded by a container class loader that does not resolve resources from
+        // the jar Mockito was loaded from (see issue #3769), the raw dispatcher resource must be
+        // resolvable through the system class loader for the fallback lookup to succeed.
+        assertThat(
+                        ClassLoader.getSystemClassLoader()
+                                .getResource(
+                                        "org/mockito/internal/creation/bytebuddy/inject-MockMethodDispatcher.raw"))
+                .isNotNull();
+    }
+
     private static final class FinalClass {
 
         public String foo() {

@@ -42,6 +42,7 @@ include(
     "mockito-integration-tests:module-tests",
     "mockito-integration-tests:module-named-tests",
     "mockito-integration-tests:memory-tests",
+    "mockito-integration-tests:classloading-tests",
     "mockito-integration-tests:junit-jupiter-parallel-tests",
     "mockito-integration-tests:osgi-tests",
     "mockito-integration-tests:programmatic-tests",
