@@ -18,6 +18,10 @@ plugins.withType<JavaPlugin> {
             // I don't believe those warnings add value given modern IDEs
             options.isWarnings = false
             options.encoding = "UTF-8"
+            // Compile against the Java 11 API even when building with a newer
+            // JDK, so that using a newer JDK API fails the build instead of
+            // failing at runtime. See https://github.com/gradle/gradle/issues/34035
+            options.release.set(javaReleaseVersion)
         }
 
         withType<Javadoc>().configureEach {

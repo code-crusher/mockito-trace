@@ -37,6 +37,11 @@ tasks {
     }
 
     withType<JavaCompile> {
+        // ErrorProne compiles against the jdk.compiler internals, which are not
+        // visible when compiling with --release. Fall back to source/target
+        // compatibility, as configured by the Java conventions.
+        options.release.set(null)
+
         options.compilerArgs.addAll(
             listOf(
                 "--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED",
