@@ -147,6 +147,22 @@ import org.mockito.junit.MockitoJUnitRunner;
  * </p>
  *
  * <p>
+ * Mocks declared in the test are also injected into the mocks that were injected into the
+ * &#064;InjectMocks instance, so that nested mocks are supported:
+ * </p>
+ * <pre class="code"><code class="java">
+ *   &#064;Mock private MockObject1 mockObject1; // MockObject2 declares a field of type MockObject1
+ *   &#064;Mock private MockObject2 mockObject2;
+ *
+ *   &#064;InjectMocks private SystemUnderTest systemUnderTest; // declares a field of type MockObject2
+ * </code></pre>
+ * <p>
+ * Here, <code>mockObject2</code> is injected into <code>systemUnderTest</code> and
+ * <code>mockObject1</code> is injected into <code>mockObject2</code>. Nested mocks are injected
+ * by field access, since invoking a setter of a mock would only record an invocation.
+ * </p>
+ *
+ * <p>
  * <strong><code>MockitoAnnotations.openMocks(this)</code></strong> method has to be called to initialize annotated objects.
  * In above example, <code>openMocks()</code> is called in &#064;Before (JUnit4) method of test's base class.
  * <strong>Instead</strong> you can also put openMocks() in your JUnit runner (&#064;RunWith) or use the built-in

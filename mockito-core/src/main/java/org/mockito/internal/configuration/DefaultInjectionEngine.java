@@ -23,6 +23,7 @@ public class DefaultInjectionEngine {
                 .tryConstructorInjection()
                 .tryPropertyOrFieldInjection()
                 .handleSpyAnnotation()
+                .injectNestedMocks()
                 .apply();
     }
 }

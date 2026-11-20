@@ -83,6 +83,15 @@ public final class MockInjection {
             return this;
         }
 
+        /**
+         * Injects the mocks into the mocks that were injected into the &#064;InjectMocks
+         * instance, allowing for nested injection.
+         */
+        public OngoingMockInjection injectNestedMocks() {
+            postInjectionStrategies.thenTry(new NestedInjection());
+            return this;
+        }
+
         public void apply() {
             for (Field field : fields) {
                 injectionStrategies.process(field, fieldOwner, mocks);

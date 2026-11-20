@@ -23,6 +23,21 @@ import org.mockito.plugins.MemberAccessor;
  * </ul>
  */
 public class TerminalMockCandidateFilter implements MockCandidateFilter {
+
+    private final boolean usePropertySetter;
+
+    public TerminalMockCandidateFilter() {
+        this(true);
+    }
+
+    /**
+     * @param usePropertySetter whether a property setter should be used if available, otherwise
+     *                          the field is accessed directly
+     */
+    public TerminalMockCandidateFilter(boolean usePropertySetter) {
+        this.usePropertySetter = usePropertySetter;
+    }
+
     @Override
     public OngoingInjector filterCandidate(
             final Collection<Object> mocks,
@@ -36,8 +51,9 @@ public class TerminalMockCandidateFilter implements MockCandidateFilter {
             MemberAccessor accessor = Plugins.getMemberAccessor();
             return () -> {
                 try {
-                    if (!new BeanPropertySetter(injectee, candidateFieldToBeInjected)
-                            .set(matchingMock)) {
+                    if (!usePropertySetter
+                            || !new BeanPropertySetter(injectee, candidateFieldToBeInjected)
+                                    .set(matchingMock)) {
                         accessor.set(candidateFieldToBeInjected, injectee, matchingMock);
                     }
                 } catch (RuntimeException | IllegalAccessException e) {
