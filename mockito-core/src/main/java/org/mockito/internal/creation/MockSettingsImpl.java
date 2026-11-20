@@ -34,6 +34,7 @@ import org.mockito.listeners.StubbingLookupListener;
 import org.mockito.listeners.VerificationStartedListener;
 import org.mockito.mock.MockCreationSettings;
 import org.mockito.mock.MockName;
+import org.mockito.mock.MockScope;
 import org.mockito.mock.MockType;
 import org.mockito.mock.SerializableMode;
 import org.mockito.quality.Strictness;
@@ -265,6 +266,15 @@ public class MockSettingsImpl<T> extends CreationSettings<T>
     @Override
     public MockSettings genericTypeToMock(Type genericType) {
         this.genericTypeToMock = genericType;
+        return this;
+    }
+
+    @Override
+    public MockSettings scope(MockScope scope) {
+        if (scope == null) {
+            throw methodDoesNotAcceptParameter("scope", "null parameters.");
+        }
+        this.scope = scope;
         return this;
     }
 

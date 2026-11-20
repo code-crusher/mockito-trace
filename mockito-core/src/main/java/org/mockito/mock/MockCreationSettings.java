@@ -159,4 +159,14 @@ public interface MockCreationSettings<T> {
      * @since 5.9.0
      */
     MockType getMockType();
+
+    /**
+     * Returns the scope in which the mock is active.
+     *
+     * @see MockScope
+     * @since 5.25.0
+     */
+    default MockScope getScope() {
+        return MockScope.THREAD;
+    }
 }

@@ -11,6 +11,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
 import java.lang.instrument.Instrumentation;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -112,6 +113,7 @@ public class InlineBytecodeGeneratorTest {
                 instrumentation,
                 new WeakConcurrentMap<>(false),
                 new DetachedThreadLocal<>(DetachedThreadLocal.Cleaner.MANUAL),
+                new ConcurrentHashMap<>(),
                 new DetachedThreadLocal<>(DetachedThreadLocal.Cleaner.MANUAL),
                 type -> false,
                 (type, object, arguments, parameterTypeNames) -> object);

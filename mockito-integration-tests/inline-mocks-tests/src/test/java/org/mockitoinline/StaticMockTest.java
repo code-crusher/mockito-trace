@@ -9,7 +9,11 @@ import static junit.framework.TestCase.assertNull;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.withSettings;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Test;
@@ -18,6 +22,7 @@ import org.mockito.Mockito;
 import org.mockito.exceptions.base.MockitoException;
 import org.mockito.exceptions.verification.NoInteractionsWanted;
 import org.mockito.exceptions.verification.WantedButNotInvoked;
+import org.mockito.mock.MockScope;
 
 public final class StaticMockTest {
 
@@ -174,6 +179,106 @@ public final class StaticMockTest {
             assertEquals("bar", Dummy.foo());
             dummy.verify(Dummy::foo, times(2));
         }
+    }
+
+    @Test
+    public void testGlobalStaticMockAffectsDifferentThread() throws InterruptedException {
+        try (MockedStatic<Dummy> ignored =
+                Mockito.mockStatic(Dummy.class, withSettings().scope(MockScope.GLOBAL))) {
+            AtomicReference<String> reference = new AtomicReference<>();
+            Thread thread = new Thread(() -> reference.set(Dummy.foo()));
+            thread.start();
+            thread.join();
+            assertNull(reference.get());
+        }
+        assertEquals("foo", Dummy.foo());
+    }
+
+    @Test
+    public void testGlobalStaticMockStubbingVisibleInDifferentThread() throws InterruptedException {
+        try (MockedStatic<Dummy> dummy =
+                Mockito.mockStatic(Dummy.class, withSettings().scope(MockScope.GLOBAL))) {
+            dummy.when(Dummy::foo).thenReturn("bar");
+            assertEquals("bar", Dummy.foo());
+
+            AtomicReference<String> reference = new AtomicReference<>();
+            Thread thread = new Thread(() -> reference.set(Dummy.foo()));
+            thread.start();
+            thread.join();
+            assertEquals("bar", reference.get());
+
+            dummy.verify(Dummy::foo, times(2));
+        }
+        assertEquals("foo", Dummy.foo());
+    }
+
+    @Test
+    public void testGlobalStaticMockMustBeExclusiveInScope() {
+        assertThatThrownBy(
+                        () -> {
+                            try (MockedStatic<Dummy> global =
+                                            Mockito.mockStatic(
+                                                    Dummy.class,
+                                                    withSettings().scope(MockScope.GLOBAL));
+                                    MockedStatic<Dummy> duplicate =
+                                            Mockito.mockStatic(
+                                                    Dummy.class,
+                                                    withSettings().scope(MockScope.GLOBAL))) {}
+                        })
+                .isInstanceOf(MockitoException.class)
+                .hasMessageContaining("static mocking is already registered globally");
+    }
+
+    @Test
+    public void testThreadLocalStaticMockDoesNotConflictWithGlobalStaticMock()
+            throws InterruptedException {
+        try (MockedStatic<Dummy> global =
+                Mockito.mockStatic(Dummy.class, withSettings().scope(MockScope.GLOBAL))) {
+            global.when(Dummy::foo).thenReturn("bar");
+
+            AtomicReference<String> reference = new AtomicReference<>();
+            Thread thread =
+                    new Thread(
+                            () -> {
+                                // The thread-local mock shadows the global one on its thread.
+                                try (MockedStatic<Dummy> local = Mockito.mockStatic(Dummy.class)) {
+                                    local.when(Dummy::foo).thenReturn("qux");
+                                    reference.set(Dummy.foo());
+                                }
+                                // Once released, the global mock becomes visible again.
+                                reference.set(Dummy.foo());
+                            });
+            thread.start();
+            thread.join();
+            assertEquals("bar", reference.get());
+
+            assertEquals("bar", Dummy.foo());
+            // The worker thread and the main thread both invoked the global mock.
+            global.verify(Dummy::foo, times(2));
+        }
+    }
+
+    @Test
+    public void testGlobalStaticMockWorksForTasksSubmittedToExecutorService() throws Exception {
+        try (MockedStatic<Dummy> dummy =
+                Mockito.mockStatic(Dummy.class, withSettings().scope(MockScope.GLOBAL))) {
+            dummy.when(Dummy::foo).thenReturn("bar");
+
+            ExecutorService executorService = Executors.newSingleThreadExecutor();
+            try {
+                Future<String> future = executorService.submit(Dummy::foo);
+                assertEquals("bar", future.get());
+
+                // A task that was submitted before the mock is released also observes it.
+                Future<String> submitted = executorService.submit(Dummy::foo);
+                assertEquals("bar", submitted.get());
+            } finally {
+                executorService.shutdownNow();
+            }
+
+            dummy.verify(Dummy::foo, times(2));
+        }
+        assertEquals("foo", Dummy.foo());
     }
 
     @Test

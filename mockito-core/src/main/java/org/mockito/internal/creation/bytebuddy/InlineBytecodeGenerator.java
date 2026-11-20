@@ -91,6 +91,7 @@ public class InlineBytecodeGenerator implements BytecodeGenerator, ClassFileTran
             Instrumentation instrumentation,
             WeakConcurrentMap<Object, MockMethodInterceptor> mocks,
             DetachedThreadLocal<Map<Class<?>, MockMethodInterceptor>> mockedStatics,
+            Map<Class<?>, MockMethodInterceptor> globalMockedStatics,
             DetachedThreadLocal<Map<Object, MockMethodInterceptor>> mockedSingletons,
             Predicate<Class<?>> isMockConstruction,
             ConstructionCallback onConstruction) {
@@ -190,6 +191,7 @@ public class InlineBytecodeGenerator implements BytecodeGenerator, ClassFileTran
                 new MockMethodAdvice(
                         mocks,
                         mockedStatics,
+                        globalMockedStatics,
                         mockedSingletons,
                         identifier,
                         isMockConstruction,

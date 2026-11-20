@@ -18,6 +18,7 @@ import org.mockito.listeners.StubbingLookupListener;
 import org.mockito.listeners.VerificationStartedListener;
 import org.mockito.mock.MockCreationSettings;
 import org.mockito.mock.MockName;
+import org.mockito.mock.MockScope;
 import org.mockito.mock.MockType;
 import org.mockito.mock.SerializableMode;
 import org.mockito.quality.Strictness;
@@ -51,6 +52,7 @@ public class CreationSettings<T> implements MockCreationSettings<T>, Serializabl
     protected Strictness strictness = null;
     protected String mockMaker;
     protected MockType mockType;
+    protected MockScope scope = MockScope.THREAD;
 
     public CreationSettings() {}
 
@@ -76,6 +78,7 @@ public class CreationSettings<T> implements MockCreationSettings<T>, Serializabl
         this.stripAnnotations = copy.stripAnnotations;
         this.mockMaker = copy.mockMaker;
         this.mockType = copy.mockType;
+        this.scope = copy.getScope();
     }
 
     @Override
@@ -209,5 +212,15 @@ public class CreationSettings<T> implements MockCreationSettings<T>, Serializabl
 
     public void setMockType(MockType mockType) {
         this.mockType = mockType;
+    }
+
+    @Override
+    public MockScope getScope() {
+        return scope;
+    }
+
+    public CreationSettings<T> setScope(MockScope scope) {
+        this.scope = scope;
+        return this;
     }
 }

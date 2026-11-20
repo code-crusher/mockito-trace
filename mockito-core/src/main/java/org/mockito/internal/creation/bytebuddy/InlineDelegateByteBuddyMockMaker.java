@@ -23,6 +23,7 @@ import org.mockito.internal.util.concurrent.DetachedThreadLocal;
 import org.mockito.internal.util.concurrent.WeakConcurrentMap;
 import org.mockito.invocation.MockHandler;
 import org.mockito.mock.MockCreationSettings;
+import org.mockito.mock.MockScope;
 import org.mockito.plugins.InlineMockMaker;
 import org.mockito.plugins.MemberAccessor;
 
@@ -231,6 +232,15 @@ class InlineDelegateByteBuddyMockMaker
     private final DetachedThreadLocal<Map<Class<?>, MockMethodInterceptor>> mockedStatics =
             new DetachedThreadLocal<>(DetachedThreadLocal.Cleaner.MANUAL);
 
+    /**
+     * Interceptors of static mocks that were created with a {@link org.mockito.mock.MockScope#GLOBAL}
+     * scope. Unlike {@link #mockedStatics}, this map is shared by all threads, which is what makes
+     * those mocks visible everywhere. It is only accessed through atomic operations to allow for
+     * concurrent reads and writes.
+     */
+    private final Map<Class<?>, MockMethodInterceptor> globalMockedStatics =
+            new ConcurrentHashMap<>();
+
     private final DetachedThreadLocal<Map<Class<?>, BiConsumer<Object, MockedConstruction.Context>>>
             mockedConstruction = new DetachedThreadLocal<>(DetachedThreadLocal.Cleaner.MANUAL);
 
@@ -361,6 +371,7 @@ class InlineDelegateByteBuddyMockMaker
                                 INSTRUMENTATION,
                                 mocks,
                                 mockedStatics,
+                                globalMockedStatics,
                                 mockedSingletons,
                                 isMockConstruction,
                                 onConstruction),
@@ -518,6 +529,9 @@ class InlineDelegateByteBuddyMockMaker
         if (mock instanceof Class<?>) {
             Map<Class<?>, MockMethodInterceptor> interceptors = mockedStatics.get();
             interceptor = interceptors != null ? interceptors.get(mock) : null;
+            if (interceptor == null) {
+                interceptor = globalMockedStatics.get(mock);
+            }
         } else {
             interceptor = mocks.get(mock);
 
@@ -542,13 +556,16 @@ class InlineDelegateByteBuddyMockMaker
                 new MockMethodInterceptor(newHandler, settings);
         if (mock instanceof Class<?>) {
             Map<Class<?>, MockMethodInterceptor> interceptors = mockedStatics.get();
-            if (interceptors == null || !interceptors.containsKey(mock)) {
+            if (interceptors != null && interceptors.containsKey(mock)) {
+                interceptors.put((Class<?>) mock, mockMethodInterceptor);
+                return;
+            }
+            if (globalMockedStatics.replace((Class<?>) mock, mockMethodInterceptor) == null) {
                 throw new MockitoException(
                         "Cannot reset "
                                 + mock
                                 + " which is not currently registered as a static mock");
             }
-            interceptors.put((Class<?>) mock, mockMethodInterceptor);
         } else {
             // Check for singleton mocks first
             Map<Object, MockMethodInterceptor> singletonInterceptors = mockedSingletons.get();
@@ -581,6 +598,7 @@ class InlineDelegateByteBuddyMockMaker
             for (Map<Class<?>, ?> entry : mockedStatics.getBackingMap().target.values()) {
                 entry.remove(mock);
             }
+            globalMockedStatics.remove(mock);
         } else {
             mocks.put(
                     mock,
@@ -593,6 +611,7 @@ class InlineDelegateByteBuddyMockMaker
     @Override
     public void clearAllMocks() {
         mockedStatics.getBackingMap().clear();
+        globalMockedStatics.clear();
         mockedSingletons.getBackingMap().clear();
 
         for (Entry<Object, MockMethodInterceptor> entry : mocks) {
@@ -642,6 +661,10 @@ class InlineDelegateByteBuddyMockMaker
         }
 
         bytecodeGenerator.mockClassStatic(type);
+
+        if (settings.getScope() == MockScope.GLOBAL) {
+            return new InlineStaticMockControl<>(type, globalMockedStatics, settings, handler);
+        }
 
         Map<Class<?>, MockMethodInterceptor> interceptors = mockedStatics.get();
         if (interceptors == null) {
@@ -801,7 +824,8 @@ class InlineDelegateByteBuddyMockMaker
                         join(
                                 "For "
                                         + type.getName()
-                                        + ", static mocking is already registered in the current thread",
+                                        + ", static mocking is already registered"
+                                        + scopeSuffix(),
                                 "",
                                 "To create a new mock, the existing static mock registration must be deregistered"));
             }
@@ -820,6 +844,10 @@ class InlineDelegateByteBuddyMockMaker
                                         + type.getSimpleName()
                                         + ".class)"));
             }
+        }
+
+        private String scopeSuffix() {
+            return settings.getScope() == MockScope.GLOBAL ? " globally" : " in the current thread";
         }
     }
 

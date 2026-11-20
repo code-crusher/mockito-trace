@@ -1711,6 +1711,17 @@ import java.util.function.Function;
  * Due to the defined scope of the static mock, it returns to its original behavior once the scope is released. To define mock
  * behavior and to verify static method invocations, use the <code>MockedStatic</code> that is returned.
  * <p>
+ * By default, a static mock is only active on the thread that created it. When the code under test invokes static methods
+ * on other threads, for example when it submits tasks to an {@link java.util.concurrent.ExecutorService}, the mock can be
+ * activated for all threads using {@link org.mockito.mock.MockScope#GLOBAL}:
+ *
+ * <pre class="code"><code class="java">
+ * try (MockedStatic&lt;Foo&gt; mocked = mockStatic(Foo.class, withSettings().scope(MockScope.GLOBAL))) {
+ * mocked.when(Foo::method).thenReturn("bar");
+ * // Returns "bar" on any thread.
+ * executorService.submit(Foo::method).get();
+ * }
+ * </code></pre>
  *
  * <h3 id="49">49. <a class="meaningful_link" href="#mocked_construction" name="mocked_construction">Mocking object construction</a> (since 3.5.0)</h3>
  *
@@ -2545,7 +2556,7 @@ public class Mockito extends ArgumentMatchers {
      * See examples in javadoc for {@link Mockito} class
      *
      * @param classToMock class or interface of which static mocks should be mocked.
-     * @param mockSettings the settings to use where only name and default answer are considered.
+     * @param mockSettings the settings to use where only name, default answer and scope are considered.
      * @return mock controller
      */
     public static <T> MockedStatic<T> mockStatic(Class<T> classToMock, MockSettings mockSettings) {

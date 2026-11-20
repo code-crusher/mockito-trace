@@ -15,6 +15,7 @@ import org.mockito.listeners.InvocationListener;
 import org.mockito.listeners.StubbingLookupListener;
 import org.mockito.listeners.VerificationStartedListener;
 import org.mockito.mock.MockCreationSettings;
+import org.mockito.mock.MockScope;
 import org.mockito.mock.SerializableMode;
 import org.mockito.plugins.MockMaker;
 import org.mockito.quality.Strictness;
@@ -411,4 +412,34 @@ public interface MockSettings extends Serializable {
      * @return
      */
     MockSettings genericTypeToMock(Type genericTypeToMock);
+
+    /**
+     * Specifies the scope in which the mock is active. This setting is only meaningful for
+     * <em>scoped</em> mocks created by {@link Mockito#mockStatic(Class, MockSettings)}:
+     * for regular instance mocks, where the mock object itself is passed around, the setting
+     * has no effect.
+     * <p>
+     * By default, a static mock is only active on the thread that created it
+     * ({@link MockScope#THREAD}), so that concurrently running tests do not interfere with one
+     * another. When the code under test invokes static methods on other threads, for example when
+     * it submits tasks to an {@link java.util.concurrent.ExecutorService}, the mock can be made
+     * visible to those threads with {@link MockScope#GLOBAL}:
+     * <pre class="code"><code class="java">
+     * try (MockedStatic&lt;Foo&gt; mocked = Mockito.mockStatic(Foo.class, withSettings().scope(MockScope.GLOBAL))) {
+     *     mocked.when(Foo::method).thenReturn("bar");
+     *     // Also returns "bar" when invoked on a worker thread.
+     *     assertEquals("bar", Foo.method());
+     * }
+     * </code></pre>
+     * <p>
+     * A global static mock is active on all threads of the JVM until it is closed, which makes it
+     * unsafe with respect to concurrently executing tests. It is therefore recommended to keep
+     * its scope as small as possible, for example by activating it within a try-with-resources
+     * block.
+     *
+     * @param scope the scope in which the mock is active
+     * @return settings instance so that you can fluently specify other settings
+     * @since 5.25.0
+     */
+    MockSettings scope(MockScope scope);
 }

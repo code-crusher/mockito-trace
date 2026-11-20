@@ -17,6 +17,7 @@ import org.mockito.Mockito;
 import org.mockito.exceptions.base.MockitoException;
 import org.mockito.exceptions.verification.NoInteractionsWanted;
 import org.mockito.exceptions.verification.WantedButNotInvoked;
+import org.mockito.mock.MockScope;
 
 public final class SpyStaticTest {
 
@@ -245,6 +246,19 @@ public final class SpyStaticTest {
                         })
                 .isInstanceOf(MockitoException.class)
                 .hasMessageContaining("static mocking is already registered in the current thread");
+    }
+
+    @Test
+    public void testStaticSpyWithGlobalScopeCallsRealMethodsOnOtherThreads()
+            throws InterruptedException {
+        AtomicReference<String> reference = new AtomicReference<>();
+        try (MockedStatic<Dummy> ignored =
+                Mockito.spyStatic(Dummy.class, withSettings().scope(MockScope.GLOBAL))) {
+            Thread thread = new Thread(() -> reference.set(Dummy.foo()));
+            thread.start();
+            thread.join();
+        }
+        assertEquals("foo", reference.get());
     }
 
     static class Dummy {

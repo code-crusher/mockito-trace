@@ -10,9 +10,11 @@ import org.mockito.stubbing.OngoingStubbing;
 import org.mockito.verification.VerificationMode;
 
 /**
- * Represents an active mock of a type's static methods. The mocking only affects the thread
- * on which this static mock was created and it is not safe to use this object from another
- * thread. The static mock is released when this object's {@link MockedStatic#close()} method
+ * Represents an active mock of a type's static methods. By default, the mocking only affects the
+ * thread on which this static mock was created and it is not safe to use this object from another
+ * thread. This can be changed by creating the static mock with a
+ * {@link org.mockito.mock.MockScope#GLOBAL} scope, which activates the mocking on all threads.
+ * The static mock is released when this object's {@link MockedStatic#close()} method
  * is invoked. If this object is never closed, the static mock will remain active on the
  * initiating thread. It is therefore recommended to create this object within a try-with-resources
  * statement unless when managed explicitly, for example by using a JUnit rule or extension.

@@ -68,6 +68,7 @@ public class MockMethodAdvice extends MockMethodDispatcher {
 
     private final WeakConcurrentMap<Object, MockMethodInterceptor> interceptors;
     private final DetachedThreadLocal<Map<Class<?>, MockMethodInterceptor>> mockedStatics;
+    private final Map<Class<?>, MockMethodInterceptor> globalMockedStatics;
     private final DetachedThreadLocal<Map<Object, MockMethodInterceptor>> mockedSingletons;
 
     private final String identifier;
@@ -83,12 +84,14 @@ public class MockMethodAdvice extends MockMethodDispatcher {
     public MockMethodAdvice(
             WeakConcurrentMap<Object, MockMethodInterceptor> interceptors,
             DetachedThreadLocal<Map<Class<?>, MockMethodInterceptor>> mockedStatics,
+            Map<Class<?>, MockMethodInterceptor> globalMockedStatics,
             DetachedThreadLocal<Map<Object, MockMethodInterceptor>> mockedSingletons,
             String identifier,
             Predicate<Class<?>> isMockConstruction,
             ConstructionCallback onConstruction) {
         this.interceptors = interceptors;
         this.mockedStatics = mockedStatics;
+        this.globalMockedStatics = globalMockedStatics;
         this.mockedSingletons = mockedSingletons;
         this.onConstruction = onConstruction;
         this.identifier = identifier;
@@ -147,19 +150,33 @@ public class MockMethodAdvice extends MockMethodDispatcher {
     @Override
     public Callable<?> handleStatic(Class<?> type, Method origin, Object[] arguments)
             throws Throwable {
-        Map<Class<?>, MockMethodInterceptor> interceptors = mockedStatics.get();
-        if (interceptors == null || !interceptors.containsKey(type)) {
+        MockMethodInterceptor interceptor = getStaticInterceptor(type);
+        if (interceptor == null) {
             return null;
         }
         return new ReturnValueWrapper(
-                interceptors
-                        .get(type)
-                        .doIntercept(
-                                type,
-                                origin,
-                                arguments,
-                                new StaticMethodCall(selfCallInfo, type, origin, arguments),
-                                LocationFactory.create(true)));
+                interceptor.doIntercept(
+                        type,
+                        origin,
+                        arguments,
+                        new StaticMethodCall(selfCallInfo, type, origin, arguments),
+                        LocationFactory.create(true)));
+    }
+
+    /**
+     * Resolves the interceptor for a static mock of the given type. A global static mock is
+     * visible to all threads, a thread-local one only to the thread that created it. A
+     * thread-local mock shadows a global mock of the same type on its own thread.
+     */
+    private MockMethodInterceptor getStaticInterceptor(Class<?> type) {
+        Map<Class<?>, MockMethodInterceptor> interceptors = mockedStatics.get();
+        if (interceptors != null) {
+            MockMethodInterceptor interceptor = interceptors.get(type);
+            if (interceptor != null) {
+                return interceptor;
+            }
+        }
+        return globalMockedStatics.get(type);
     }
 
     @Override
@@ -186,8 +203,7 @@ public class MockMethodAdvice extends MockMethodDispatcher {
         if (!selfCallInfo.checkSelfCall(type)) {
             return false;
         }
-        Map<Class<?>, ?> interceptors = mockedStatics.get();
-        return interceptors != null && interceptors.containsKey(type);
+        return getStaticInterceptor(type) != null;
     }
 
     private MockMethodInterceptor getSingletonMockInterceptor(Object instance) {

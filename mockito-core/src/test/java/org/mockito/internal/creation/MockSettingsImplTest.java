@@ -14,9 +14,11 @@ import java.util.Set;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.exceptions.base.MockitoException;
+import org.mockito.internal.creation.settings.CreationSettings;
 import org.mockito.internal.debugging.VerboseMockInvocationLogger;
 import org.mockito.listeners.InvocationListener;
 import org.mockito.listeners.StubbingLookupListener;
+import org.mockito.mock.MockScope;
 import org.mockitoutil.TestBase;
 
 public class MockSettingsImplTest extends TestBase {
@@ -265,5 +267,32 @@ public class MockSettingsImplTest extends TestBase {
     public void validates_strictness() {
         assertThatThrownBy(() -> mockSettingsImpl.strictness(null))
                 .hasMessageContaining("strictness() does not accept null parameter");
+    }
+
+    @Test
+    public void scope_isThreadByDefault() {
+        assertThat(mockSettingsImpl.getScope()).isEqualTo(MockScope.THREAD);
+    }
+
+    @Test
+    public void scope_canBeConfigured() {
+        mockSettingsImpl.scope(MockScope.GLOBAL);
+
+        assertThat(mockSettingsImpl.getScope()).isEqualTo(MockScope.GLOBAL);
+    }
+
+    @Test
+    public void validates_scope() {
+        assertThatThrownBy(() -> mockSettingsImpl.scope(null))
+                .hasMessageContaining("scope() does not accept null parameters.");
+    }
+
+    @Test
+    public void scope_survivesCopyingSettings() {
+        mockSettingsImpl.scope(MockScope.GLOBAL);
+
+        CreationSettings<?> copied = new CreationSettings<>(mockSettingsImpl);
+
+        assertThat(copied.getScope()).isEqualTo(MockScope.GLOBAL);
     }
 }
