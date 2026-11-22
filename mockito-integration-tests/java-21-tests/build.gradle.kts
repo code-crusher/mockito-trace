@@ -24,6 +24,8 @@ java {
 
 tasks {
     val testWithBytebuddyAgent by registering(Test::class) {
+        testClassesDirs = sourceSets.test.get().output.classesDirs
+        classpath = sourceSets.test.get().runtimeClasspath
         if (!JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_21)) {
             enabled = false
         } else {
@@ -36,6 +38,8 @@ tasks {
     }
 
     val testWithMockitoAgent by registering(Test::class) {
+        testClassesDirs = sourceSets.test.get().output.classesDirs
+        classpath = sourceSets.test.get().runtimeClasspath
         dependsOn(":mockito-core:jar")
         if (!JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_21)) {
             enabled = false
@@ -53,6 +57,8 @@ tasks {
     }
 
     val testWithEnableDynamicAgentLoading by registering(Test::class) {
+        testClassesDirs = sourceSets.test.get().output.classesDirs
+        classpath = sourceSets.test.get().runtimeClasspath
         if (!JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_21)) {
             enabled = false
         } else {
