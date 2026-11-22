@@ -74,6 +74,8 @@ public class VerificationOverTimeImpl implements VerificationMode {
      * If it is satisfied before the full duration has passed, behaviour is dependent on the returnOnSuccess parameter
      * given in the constructor. If true, this verification mode is immediately satisfied once the delegate is. If
      * false, this verification mode is not satisfied until the delegate is satisfied and the full time has passed.
+     * Either way, the delegate is polled at most once per pollingPeriodMillis, also after a successful poll, as the
+     * outcome can only change when new invocations arrive.
      *
      * @throws MockitoAssertionError if the delegate verification mode does not succeed before the timeout
      */
@@ -88,9 +90,9 @@ public class VerificationOverTimeImpl implements VerificationMode {
 
                 if (returnOnSuccess) {
                     return;
-                } else {
-                    error = null;
                 }
+                error = null;
+                sleep(pollingPeriodMillis);
             } catch (AssertionError e) {
                 error = handleVerifyException(e);
             }

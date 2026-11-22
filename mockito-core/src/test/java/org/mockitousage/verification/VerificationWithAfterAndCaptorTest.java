@@ -87,6 +87,31 @@ public class VerificationWithAfterAndCaptorTest {
         assertEquals('2', (char) captor.getAllValues().get(2));
     }
 
+    /**
+     * Once the delegate verification is satisfied, {@code after()} keeps polling until the full
+     * delay has passed, but must wait one polling period between polls instead of busy-spinning
+     * (#3868). Every poll re-captures the matching invocations, so the number of captured values
+     * bounds the number of polls: with a 200ms delay and Mockito's 10ms polling period there are
+     * about 20 polls, not millions.
+     */
+    @Test
+    public void should_not_poll_more_than_once_per_period_while_waiting_for_the_full_delay() {
+        // given
+        int n = 3;
+
+        // when
+        exerciseMockNTimes(n);
+
+        watch.start();
+
+        // then
+        verify(mock, after(200).times(n)).oneArg((char) captor.capture());
+
+        watch.assertElapsedTimeIsMoreThan(200, MILLISECONDS);
+        // one capture per invocation per poll: 20 polls for 200ms at 10ms, plus generous slack
+        assertThat(captor.getAllValues()).hasSizeLessThanOrEqualTo(n * 40);
+    }
+
     private void exerciseMockNTimes(int n) {
         for (int i = 0; i < n; i++) {
             mock.oneArg((char) ('0' + i));
