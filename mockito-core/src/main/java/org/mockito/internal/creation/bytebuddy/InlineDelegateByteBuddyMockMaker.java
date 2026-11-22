@@ -268,7 +268,13 @@ class InlineDelegateByteBuddyMockMaker
                                 "It appears as if you are running on a JRE. Either install a JDK or add JNA to the class path.";
                     } else {
                         detail =
-                                "It appears as if your JDK does not supply a working agent attachment mechanism.";
+                                join(
+                                        "It appears as if your JDK does not supply a working agent attachment mechanism.",
+                                        "",
+                                        "Mockito needs it to attach a Java agent to the current VM for inline mocking. If the JVM",
+                                        "was started with -XX:+DisableAttachMechanism, remove that option, or add Mockito as an",
+                                        "agent to your build as described in Mockito's documentation:",
+                                        "https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3");
                     }
                 } catch (Throwable ignored) {
                     detail =
